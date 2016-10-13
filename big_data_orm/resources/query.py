@@ -35,9 +35,9 @@ class Query(object):
         self.query_data['orders'].append(order)
         return self
 
-    def all(self, session):
+    def all(self, session, newest_only=False, filter_key=''):
         query = self.assemble()
-        return session.run_query(query)
+        return session.run_query(query, newest_only=newest_only, filter_key=filter_key)
 
     def first(self):
         """

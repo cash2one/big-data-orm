@@ -6,8 +6,8 @@ s = Session(project_id='bigdata-141819', dataset_id='adwords_report_data',
 s.connect()
 
 a = AdwordsAccount()
-q = a.query(a.clicks)
+q = a.query(a.name, a.account_id, a.clicks)
 
 q = q.filter(a.clicks > 100).order_by(a.clicks, desc=True).limit(10)
 
-print q.all(s)
+print q.all(s, newest_only=True, filter_key='account_id')
