@@ -4,34 +4,128 @@ from big_data_orm.resources.column import Column
 
 
 class Query(object):
-    def __init__(self, columns):
+    def __init__(self, columns, table_name):
+        self.table_name = table_name
         self.query_data = {}
         self.columns = columns
+        self.query_data['columns'] = self.columns
 
     def filter(self, clause):
         """
         Filter method for ORM.
         Arg clause already arrive here as a dict with op information.
         """
-        pass
+        if not clause:
+            return self
+        if 'filters' not in self.query_data.keys():
+            self.query_data['filters'] = []
+        self.query_data['filters'].append(clause)
+        return self
 
     def order_by(self, column, desc=False):
-        pass
+        if not self._column_is_present(column.name):
+            logging.error("Trying to order by a non existing column.")
+            return self
+        order = {
+            'column': column.name,
+            'desc': desc
+        }
+        if 'orders' not in self.query_data.keys():
+            self.query_data['orders'] = []
+        self.query_data['orders'].append(order)
+        return self
 
-    def all(self):
-        pass
+    def all(self, session):
+        query = self.assemble()
+        return session.run_query(query)
 
     def first(self):
+        """
+        Return the first element as a dict
+        """
         pass
 
     def limit(self, value):
-        pass
+        limit = {
+            'value': value
+        }
+        self.query_data['limit'] = limit
+        return self
 
     def assemble(self):
-        pass
+        sql_query = 'SELECT {} FROM {}'
+        fields = ''
+        for column in self.columns:
+            fields += str(column.name) + ', '
+        fields = fields[:-2]
 
-    def _get_model_columns(self):
-        pass
+        if 'filters' in self.query_data.keys():
+            sql_query += self._build_filters_clause()
+
+        if 'orders' in self.query_data.keys():
+            sql_query += self._build_orders_clause()
+
+        if 'limit' in self.query_data.keys():
+            sql_query += self._build_limit_clause()
+
+        sql_query = sql_query.format(fields, self.table_name, '')
+        return sql_query
+
+    def _build_limit_clause(self):
+        query = ' LIMIT {}'.format(self.query_data['limit']['value'])
+        return query
+
+    def _build_orders_clause(self):
+        query = ''
+        not_first_clause = False
+        for order in self.query_data['orders']:
+
+            if not not_first_clause:
+                order_or_comma = 'ORDER BY'
+            else:
+                order_or_comma = ','
+
+            if order['desc']:
+                query += ' {} {} DESC'.format(order_or_comma, order['column'])
+            else:
+                query += ' {} {}'.format(order_or_comma, order['column'])
+
+            not_first_clause = True
+        return query
+
+    def _build_filters_clause(self):
+        query = ' WHERE '
+        not_first_clause = False
+        for filter_clause in self.query_data['filters']:
+            clause_sql = '{} {} {}'
+            right_value = filter_clause['right_value']
+
+            if not_first_clause:
+                query += ' and '
+
+            if filter_clause['right_value_type'] is str:
+                clause_sql = '{} {} \'{}\''
+
+            if filter_clause['right_value_type'] is list:
+                right_value = self._parse_in_list(filter_clause['right_value'])
+
+            query += clause_sql.format(
+                filter_clause['left_value'], filter_clause['signal'],
+                right_value
+            )
+            not_first_clause = True
+        return query
+
+    def _parse_in_list(self, values):
+        in_clause_query = "("
+        for v in values:
+            if type(v) is str:
+                in_clause_query += '\'' + str(v) + '\'' + ","
+            else:
+                in_clause_query += str(v) + ","
+        in_clause_query = in_clause_query[:-1]
+        in_clause_query += ")"
+        return in_clause_query
 
     def _check_filter_columns(self, op):
         """
