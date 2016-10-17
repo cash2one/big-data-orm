@@ -18,14 +18,16 @@ class BaseModel(object):
             logging.error("Table name not defined...")
             return None
 
+        columns = []
+
         if not args:
             columns = self._get_all_columns()
         else:
             columns = [i for i in args]
 
-        if type(columns) is not list:
-            logging.error("Invalid argument. Should be a list of columns.")
+        if not columns:
             return None
+
         return Query(columns, self.__tablename__)
 
     def _get_all_columns(self):
@@ -33,6 +35,7 @@ class BaseModel(object):
                    if type(getattr(self.__class__(), attr)) is Column]
         if not columns:
             logging.error("Model is out of columns!")
+            return []
         else:
             columns_obj = [getattr(self.__class__(), column) for column in columns]
-        return columns_obj
+            return columns_obj

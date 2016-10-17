@@ -39,11 +39,12 @@ class Query(object):
         query = self.assemble()
         return session.run_query(query, newest_only=newest_only, filter_key=filter_key)
 
-    def first(self):
+    def first(self, session, newest_only=False, filter_key=''):
         """
         Return the first element as a dict
         """
-        pass
+        query = self.assemble()
+        return session.run_query(query, newest_only=newest_only, filter_key=filter_key)[0]
 
     def limit(self, value):
         limit = {
