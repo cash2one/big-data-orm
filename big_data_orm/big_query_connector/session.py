@@ -23,6 +23,9 @@ class Session(object):
         self.service = None
 
     def connect(self):
+        """
+        Connect with BigQuery API and create a service.
+        """
         storage = file.Storage(self.storage_file)
         credential = storage.get()
         base_authentication = credential.authorize(http=Http())
@@ -64,6 +67,13 @@ class Session(object):
         return self._get_query_result(job_id)
 
     def _check_if_finished(self, job_id):
+        """
+        Get jib info from bigquery and check if is already finished.
+        Args:
+            job_id: (str) Job ID.
+        Return:
+            (bool) True if is finished. False otherwise.
+        """
         self.connect()
         request = self.service.jobs().get(projectId=self.project_id, jobId=job_id)
         response = request.execute()
@@ -73,6 +83,9 @@ class Session(object):
             return False
 
     def _get_job_id(self, job_json):
+        """
+        Return the Job ID inside job dict.
+        """
         return job_json['jobReference']['jobId']
 
     def _get_query_result(self, job_id):
@@ -89,6 +102,13 @@ class Session(object):
         return self._build_simple_dict(response)
 
     def _build_simple_dict(self, response):
+        """
+        Build a simple list of dicts from bigquery response.
+        Args:
+            response: (dict) BigQuery response.
+        Return:
+            (list) List of dicts. Each dict is a table tuple.
+        """
         try:
             fields = response['schema']['fields']
             rows = response['rows']
@@ -149,6 +169,9 @@ class Session(object):
         return base_query
 
     def _build_request_body(self, query):
+        """
+        Build the dict that will be sent as payload to bigquery.
+        """
         payload = {
             'query': query,
             'defaultDataset': {
