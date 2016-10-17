@@ -88,7 +88,7 @@ s.connect()
 a = AdwordsAccount()
 q = a.query(a.name, a.account_id, a.clicks)
 
-q = q.filter(a.clicks > 100).order_by(a.clicks, desc=True).limit(10)
+q = q.filter(a.clicks < 10).order_by(a.clicks, desc=True).limit(10)
 
 # newest_only and filter_key are optional
 # print q.all(s, newest_only=True, filter_key='account_id')
