@@ -1,3 +1,4 @@
 nose
 coverage
+mock
 google-api-python-client

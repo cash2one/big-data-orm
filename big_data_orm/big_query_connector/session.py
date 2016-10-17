@@ -1,5 +1,6 @@
 import re
 import time
+import logging
 
 from apiclient import discovery
 from oauth2client import file
@@ -42,12 +43,17 @@ class Session(object):
         Return:
             (dict) Dict with all the tuples returned by the query.
         """
+        if not self.connected:
+            logging.error("Not connected...")
+            return {}
+
         if newest_only:
             if not filter_key:
                 print "Error: missing filter_key"
                 return {}
             data_from_query = self._extract_data_from_query(query)
             query = self._build_newest_only_query(data_from_query, filter_key)
+
         request_body = self._build_request_body(query)
         request = self.service.jobs().query(projectId=self.project_id, body=request_body)
         response = request.execute()
