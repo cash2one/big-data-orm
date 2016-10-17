@@ -97,7 +97,7 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name)
         q = q.filter(c_1 == 'test')
         expected_response = 'SELECT column_1, column_2 FROM testing WHERE ' + \
-            'column_1=\'test\''
+            'column_1 = \'test\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -121,7 +121,7 @@ class QueryTestCase(unittest.TestCase):
         q = q.filter(c_1 == 'test')
         q = q.filter(c_2 == 'test2')
         expected_response = 'SELECT column_1, column_2 FROM testing WHERE ' + \
-            'column_1=\'test\' and column_2=\'test2\''
+            'column_1 = \'test\' and column_2 = \'test2\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -133,7 +133,7 @@ class QueryTestCase(unittest.TestCase):
         q = q.filter(c_1 >= 'test')
         q = q.filter(c_2 == 'test2')
         expected_response = 'SELECT column_1, column_2 FROM testing WHERE ' + \
-            'column_1>=\'test\' and column_2=\'test2\''
+            'column_1 >= \'test\' and column_2 = \'test2\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -146,6 +146,6 @@ class QueryTestCase(unittest.TestCase):
         # Wrong comparision
         q = q.filter(c_2 == 100)
         expected_response = 'SELECT column_1, column_2 FROM testing WHERE ' + \
-            'column_1>=\'test\''
+            'column_1 >= \'test\''
         response = q.assemble()
         self.assertEquals(expected_response, response)

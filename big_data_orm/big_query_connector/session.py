@@ -1,8 +1,11 @@
 import re
+import time
 
 from apiclient import discovery
 from oauth2client import file
 from httplib2 import Http
+
+CHECK_JOB_INTERVAL = 10
 
 
 class Session(object):
@@ -42,9 +45,46 @@ class Session(object):
                 return {}
             data_from_query = self._extract_data_from_query(query)
             query = self._build_newest_only_query(data_from_query, filter_key)
-
         request_body = self._build_request_body(query)
         request = self.service.jobs().query(projectId=self.project_id, body=request_body)
+        response = request.execute()
+        return self._wait_for_response(response)
+
+    def _wait_for_response(self, job_json):
+        """
+        Wait until the job sent to BigQuery is finished.
+        Args:
+            project_id: (str) Project ID.
+            job_json: (str) BigQuery job structure.
+            storage_file: (str) path to *.dat file.
+        """
+        job_id = self._get_job_id(job_json)
+        while not self._check_if_finished(job_id):
+            time.sleep(CHECK_JOB_INTERVAL)
+        return self._get_query_result(job_id)
+
+    def _check_if_finished(self, job_id):
+        self.connect()
+        request = self.service.jobs().get(projectId=self.project_id, jobId=job_id)
+        response = request.execute()
+        if response['status']['state'] == 'DONE':
+            return True
+        else:
+            return False
+
+    def _get_job_id(self, job_json):
+        return job_json['jobReference']['jobId']
+
+    def _get_query_result(self, job_id):
+        """
+        Since the job has finished, collect the query result.
+        Args:
+            project_id: (str) Project ID.
+            job_id: (str) BigQuery job ID.
+            storage_file: (str) path to *.dat file.
+        """
+        self.connect()
+        request = self.service.jobs().getQueryResults(projectId=self.project_id, jobId=job_id)
         response = request.execute()
         return self._build_simple_dict(response)
 

@@ -2,7 +2,7 @@ from big_data_orm.resources.column import Column
 from big_data_orm.resources.base_model import BaseModel
 
 
-class AdwordsSearchTerms(BaseModel):
+class AdwordsSearchTerm(BaseModel):
     def __init__(self):
         self.__tablename__ = 'adwords_search_terms_report'
         self.id = Column(str, 'id')
