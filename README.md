@@ -3,7 +3,30 @@ ORM to collect data from Raccoon BigData.
 
 ## Install
 
-To install this library...
+### pip
+
+```
+pip install git+https://github.com/devraccoon/big-data-orm
+```
+
+### setup.py
+
+``` python
+setup(
+    ...
+    install_requires=[
+        ...
+        'big-data-orm',
+        ...
+        ],
+    ...
+    dependency_links=[
+        ...
+        'https://github.com/devraccoon/big-data-orm/tarball/master#egg=big-data-orm'
+        ...
+    ]
+)
+```
 
 ## Usage
 
