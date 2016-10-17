@@ -28,6 +28,7 @@ Expressions accepted:
 * column_1 < (value | other_column)
 * column_1 >= (value | other_column)
 * column_1 <= (value | other_column)
+* column_1.in_([list_of_values])
 
 Example:
 ``` python
