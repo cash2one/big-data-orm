@@ -21,6 +21,7 @@ class fakeRequest():
     def execute():
         return None
 
+
 class fakeService():
     @staticmethod
     def jobs():
@@ -29,6 +30,46 @@ class fakeService():
     @staticmethod
     def query(projectId, body):
         return fakeRequest
+
+
+class fakeService2():
+    @staticmethod
+    def jobs():
+        return fakeService2
+
+    @staticmethod
+    def get(projectId, jobId):
+        return fakeRequestWithData
+
+
+class fakeRequestWithData():
+    @staticmethod
+    def execute():
+        return {
+            'status': {
+                'state': 'DONE'
+            }
+        }
+
+
+class fakeService3():
+    @staticmethod
+    def jobs():
+        return fakeService3
+
+    @staticmethod
+    def get(projectId, jobId):
+        return fakeRequestWithData2
+
+
+class fakeRequestWithData2():
+    @staticmethod
+    def execute():
+        return {
+            'status': {
+                'state': 'NOT_DONE'
+            }
+        }
 
 
 class SessionTestCase(unittest.TestCase):
@@ -102,7 +143,7 @@ class SessionTestCase(unittest.TestCase):
         s = self._build_session()
         s.connect()
 
-        response = s.run_query('query', newest_only=True, filter_key='id')
+        s.run_query('query', newest_only=True, filter_key='id')
         fake_extractor.assert_called_with('query')
         fake_builder.assert_called_with('query_data', 'id')
         fake_request_builder.assert_called_with('query_built')
@@ -131,3 +172,43 @@ class SessionTestCase(unittest.TestCase):
         fake_get_job_id.assert_called_with(fake_job)
         fake_finished.assert_called_with(10)
         fake_query_result.assert_called_with(10)
+
+    @mock.patch('big_data_orm.big_query_connector.session.file.Storage')
+    @mock.patch('big_data_orm.big_query_connector.session.discovery')
+    @mock.patch('big_data_orm.big_query_connector.session.Http')
+    def test_is_finished(self, fake_http, fake_discovery, fake_file_storage):
+        fake_discovery.build.return_value = fakeService2
+        fake_file_storage.return_value = fakeStorage
+
+        s = self._build_session()
+        s.connect()
+        response = s._check_if_finished(10)
+        self.assertEqual(True, response)
+
+    @mock.patch('big_data_orm.big_query_connector.session.file.Storage')
+    @mock.patch('big_data_orm.big_query_connector.session.discovery')
+    @mock.patch('big_data_orm.big_query_connector.session.Http')
+    def test_is_finished_nope(self, fake_http, fake_discovery, fake_file_storage):
+        fake_discovery.build.return_value = fakeService3
+        fake_file_storage.return_value = fakeStorage
+
+        s = self._build_session()
+        s.connect()
+        response = s._check_if_finished(10)
+        self.assertEqual(False, response)
+
+    @mock.patch('big_data_orm.big_query_connector.session.file.Storage')
+    @mock.patch('big_data_orm.big_query_connector.session.discovery')
+    @mock.patch('big_data_orm.big_query_connector.session.Http')
+    def test_get_job_id(self, fake_http, fake_discovery, fake_file_storage):
+        fake_discovery.build.return_value = fakeService3
+        fake_file_storage.return_value = fakeStorage
+
+        s = self._build_session()
+        fake_job = {
+            'jobReference': {
+                'jobId': 'TEST'
+            }
+        }
+        response = s._get_job_id(fake_job)
+        self.assertEquals('TEST', response)
