@@ -22,3 +22,4 @@ class AdwordsAd(BaseModel):
         self.campaign_id = Column(str, 'campaign_id')
         self.adgroup_id = Column(str, 'adgroup_id')
         self.account_name = Column(str, 'account_name')
+        self.created_time = Column(int, 'created_time')
