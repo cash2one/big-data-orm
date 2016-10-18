@@ -44,12 +44,15 @@ class Query(object):
         Return the first element as a dict
         """
         query = self.assemble()
-        return session.run_query(query, newest_only=newest_only, filter_key=filter_key)[0]
+        response = session.run_query(query, newest_only=newest_only, filter_key=filter_key)
+        try:
+            return response[0]
+        except KeyError:
+            logging.error("Query result is not a list. Returning all results...")
+            return response
 
     def limit(self, value):
-        limit = {
-            'value': value
-        }
+        limit = {'value': value}
         self.query_data['limit'] = limit
         return self
 
@@ -69,12 +72,10 @@ class Query(object):
         if 'limit' in self.query_data.keys():
             sql_query += self._build_limit_clause()
 
-        sql_query = sql_query.format(fields, self.table_name, '')
-        return sql_query
+        return sql_query.format(fields, self.table_name, '')
 
     def _build_limit_clause(self):
-        query = ' LIMIT {}'.format(self.query_data['limit']['value'])
-        return query
+        return ' LIMIT {}'.format(self.query_data['limit']['value'])
 
     def _build_orders_clause(self):
         query = ''
@@ -121,11 +122,10 @@ class Query(object):
         in_clause_query = "("
         for v in values:
             if type(v) is str:
-                in_clause_query += '\'' + str(v) + '\'' + ","
+                in_clause_query += '\'' + str(v) + '\'' + ", "
             else:
-                in_clause_query += str(v) + ","
-        in_clause_query = in_clause_query[:-1]
-        in_clause_query += ")"
+                in_clause_query += str(v) + ", "
+        in_clause_query = in_clause_query[:-2] + ")"
         return in_clause_query
 
     def _check_filter_columns(self, op):
