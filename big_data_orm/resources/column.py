@@ -40,9 +40,6 @@ class Column(object):
         }
         return op
 
-    def _is_valid_type(self, value):
-        pass
-
     def _build_op_dict(self, op_signal, value):
         op = {
             'signal': op_signal,
@@ -64,8 +61,7 @@ class Column(object):
     def _is_column_type(self, value):
         if type(value) is Column:
             return True
-        else:
-            return False
+        return False
 
     def _check_op_types(self, right_type):
         """
@@ -84,5 +80,4 @@ class Column(object):
         if column_type is float \
                 or column_type is int:
             return True
-        else:
-            return False
+        return False

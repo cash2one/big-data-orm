@@ -7,12 +7,13 @@ from oauth2client import file
 from httplib2 import Http
 
 CHECK_JOB_INTERVAL = 10
+API_VERSION = 'v2'
 
 
 class Session(object):
     def __init__(self, project_id, dataset_id, storage_file):
         self.api_name = 'bigquery'
-        self.api_version = 'v2'
+        self.api_version = API_VERSION
         self.api_scope = [
             'https://www.googleapis.com/auth/bigquery',
             'https://www.googleapis.com/auth/cloud-platform'
@@ -44,7 +45,7 @@ class Session(object):
             (dict) Dict with all the tuples returned by the query.
         """
         if not self.connected:
-            logging.error("Not connected...")
+            logging.error("Session is not connected...")
             return {}
 
         if newest_only:
@@ -90,7 +91,7 @@ class Session(object):
 
     def _get_job_id(self, job_json):
         """
-        Return the Job ID inside job dict.
+        Find and return the job ID.
         """
         return job_json['jobReference']['jobId']
 
@@ -119,14 +120,14 @@ class Session(object):
             fields = response['schema']['fields']
             rows = response['rows']
             new_response = []
-
             for row in rows:
                 new_row = {}
                 for i in range(len(fields)):
                     new_row[fields[i]['name']] = row['f'][i]['v']
                 new_response.append(new_row)
             return new_response
-        except Exception:
+        except KeyError:
+            logging.error("Invalid BigQuery response. Returning full response as it is.")
             return response
 
     def _extract_data_from_query(self, query):
