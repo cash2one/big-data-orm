@@ -8,6 +8,7 @@ class ColumnTestCase(unittest.TestCase):
         c_1 = Column(str, 'c_1')
         r = c_1 == 'test'
         expected_r = {
+            'type': 'and',
             'signal': '=',
             'left_value': 'c_1',
             'left_value_type': str,
@@ -34,6 +35,7 @@ class ColumnTestCase(unittest.TestCase):
         c_2 = Column(int, 'c_2')
         r = c_1 == c_2
         expected_r = {
+            'type': 'and',
             'signal': '=',
             'left_value': 'c_1',
             'left_value_type': int,
@@ -46,6 +48,7 @@ class ColumnTestCase(unittest.TestCase):
         c_1 = Column(str, 'c_1')
         r = c_1 <= 'test'
         expected_r = {
+            'type': 'and',
             'signal': '<=',
             'left_value': 'c_1',
             'left_value_type': str,
@@ -58,6 +61,7 @@ class ColumnTestCase(unittest.TestCase):
         c_1 = Column(str, 'c_1')
         r = c_1 >= 'test'
         expected_r = {
+            'type': 'and',
             'signal': '>=',
             'left_value': 'c_1',
             'left_value_type': str,
@@ -70,6 +74,7 @@ class ColumnTestCase(unittest.TestCase):
         c_1 = Column(str, 'c_1')
         r = c_1 != 'test'
         expected_r = {
+            'type': 'and',
             'signal': '!=',
             'left_value': 'c_1',
             'left_value_type': str,
@@ -82,6 +87,7 @@ class ColumnTestCase(unittest.TestCase):
         c_1 = Column(str, 'c_1')
         r = c_1 > 'test'
         expected_r = {
+            'type': 'and',
             'signal': '>',
             'left_value': 'c_1',
             'left_value_type': str,
@@ -94,6 +100,7 @@ class ColumnTestCase(unittest.TestCase):
         c_1 = Column(str, 'c_1')
         r = c_1 < 'test'
         expected_r = {
+            'type': 'and',
             'signal': '<',
             'left_value': 'c_1',
             'left_value_type': str,
@@ -106,6 +113,7 @@ class ColumnTestCase(unittest.TestCase):
         c_1 = Column(str, 'c_1')
         r = c_1.in_(['t1', 't2'])
         expected_r = {
+            'type': 'and',
             'signal': 'IN',
             'left_value': 'c_1',
             'left_value_type': str,

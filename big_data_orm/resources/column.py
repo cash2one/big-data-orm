@@ -32,6 +32,7 @@ class Column(object):
             logging.error("Argument should be a list")
             return {}
         op = {
+            'type': 'and',
             'signal': 'IN',
             'left_value': self.name,
             'left_value_type': self.column_type,
@@ -42,6 +43,7 @@ class Column(object):
 
     def _build_op_dict(self, op_signal, value):
         op = {
+            'type': 'and',
             'signal': op_signal,
             'left_value': self.name,
             'left_value_type': self.column_type,

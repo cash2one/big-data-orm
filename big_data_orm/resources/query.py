@@ -96,27 +96,76 @@ class Query(object):
         return query
 
     def _build_filters_clause(self):
+        """
+        Build all the SQL that comes after WHERE statement.
+        Return:
+            (str) Full WHERE clause.
+            Example:
+                "WHERE foo == 10 and bar < 1 OR bar > -1"
+        """
         query = ' WHERE '
         not_first_clause = False
         for filter_clause in self.query_data['filters']:
-            clause_sql = '{} {} {}'
-            right_value = filter_clause['right_value']
-
-            if not_first_clause:
-                query += ' and '
-
-            if filter_clause['right_value_type'] is str:
-                clause_sql = '{} {} \'{}\''
-
-            if filter_clause['right_value_type'] is list:
-                right_value = self._parse_in_list(filter_clause['right_value'])
-
-            query += clause_sql.format(
-                filter_clause['left_value'], filter_clause['signal'],
-                right_value
-            )
-            not_first_clause = True
+            if filter_clause['type'] is 'and':
+                query += self._build_and_operation(filter_clause, not_first_clause)
+                not_first_clause = True
+            elif filter_clause['type'] is 'or':
+                query += self._build_or_operation(filter_clause, not_first_clause)
+                not_first_clause = True
         return query
+
+    def _build_and_operation(self, filter_clause, not_first_clause):
+        """
+        Build the where clause as an AND operation.
+        Args:
+            filter_clause: (dict) Clause elements.
+            not_first_clause: (bool) True if this
+            is not the first clause of the query.
+        Return:
+            (str) clause as SQL.
+            Example: " field > 100".
+            Or even " and test = 'raccoon'".
+        """
+        partial_query = ''
+        if not_first_clause:
+            partial_query += ' and '
+        partial_query += self._build_clause_core(filter_clause)
+        return partial_query
+
+    def _build_clause_core(self, filter_clause):
+        """
+        Build the core of the clause.
+        Args:
+            filter_clause: (dict) Clause elements.
+        Return:
+            (str) Example: "field != 'foo-bar'"
+        """
+        clause_sql = '{} {} {}'
+        right_value = filter_clause['right_value']
+        if filter_clause['right_value_type'] is str:
+            clause_sql = '{} {} \'{}\''
+        if filter_clause['right_value_type'] is list:
+            right_value = self._parse_in_list(filter_clause['right_value'])
+        return clause_sql.format(filter_clause['left_value'], filter_clause['signal'], right_value)
+
+    def _build_or_operation(self, filter_clause, not_first_clause):
+        """
+        An OR operation is represented by a dict with the both sides of the operation.
+        Args:
+            filter_clause: (dict) All the operation data.
+        Return:
+            (str) String with the OR clause already built.
+            Example: field = 'test' OR other_field = 'other_test'
+        """
+        partial_query = ''
+        clause_sql = '{} OR {}'
+        if not_first_clause:
+            partial_query += ' and '
+        clause_sql = clause_sql.format(
+            self._build_clause_core(filter_clause['left_side']),
+            self._build_clause_core(filter_clause['right_side'])
+        )
+        return partial_query + clause_sql
 
     def _parse_in_list(self, values):
         in_clause_query = "("
