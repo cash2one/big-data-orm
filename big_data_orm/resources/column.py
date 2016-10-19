@@ -59,9 +59,7 @@ class Column(object):
         return op
 
     def _is_column_type(self, value):
-        if type(value) is Column:
-            return True
-        return False
+        return True if type(value) is Column else False
 
     def _check_op_types(self, right_type):
         """
@@ -77,7 +75,4 @@ class Column(object):
             return False
 
     def _is_number(self, column_type):
-        if column_type is float \
-                or column_type is int:
-            return True
-        return False
+        return True if column_type is float or column_type is int else False
