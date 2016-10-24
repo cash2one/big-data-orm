@@ -1,4 +1,4 @@
-# Raccoon BigData ORM
+# Raccoon BigData ORM  [![Build Status](https://travis-ci.org/devraccoon/big-data-orm.svg?branch=master)](https://travis-ci.org/devraccoon/big-data-orm)
 ORM to collect data from Raccoon BigData.
 
 ## Install
