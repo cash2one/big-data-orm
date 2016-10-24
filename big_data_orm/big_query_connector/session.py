@@ -64,9 +64,7 @@ class Session(object):
         """
         Wait until the job sent to BigQuery is finished.
         Args:
-            project_id: (str) Project ID.
             job_json: (str) BigQuery job structure.
-            storage_file: (str) path to *.dat file.
         """
         job_id = self._get_job_id(job_json)
         while not self._check_if_finished(job_id):
@@ -75,7 +73,7 @@ class Session(object):
 
     def _check_if_finished(self, job_id):
         """
-        Get jib info from bigquery and check if is already finished.
+        Get job info from bigquery and check if is already finished.
         Args:
             job_id: (str) Job ID.
         Return:
@@ -99,9 +97,7 @@ class Session(object):
         """
         Since the job has finished, collect the query result.
         Args:
-            project_id: (str) Project ID.
             job_id: (str) BigQuery job ID.
-            storage_file: (str) path to *.dat file.
         """
         self.connect()
         request = self.service.jobs().getQueryResults(projectId=self.project_id, jobId=job_id)
