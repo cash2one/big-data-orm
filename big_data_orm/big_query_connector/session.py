@@ -102,7 +102,15 @@ class Session(object):
         self.connect()
         request = self.service.jobs().getQueryResults(projectId=self.project_id, jobId=job_id)
         response = request.execute()
-        return self._build_simple_dict(response)
+        formated_response = self._build_simple_dict(response)
+        while response.get('pageToken'):
+            logging.debug("Collecting next page. Token: {}".format(response.get('pageToken')))
+            request = self.service.jobs().getQueryResults(projectId=self.project_id, jobId=job_id,
+                                                          pageToken=response.get('pageToken'))
+            response = request.execute()
+            page_data = self._build_simple_dict(response)
+            formated_response.extend(page_data)
+        return formated_response
 
     def _build_simple_dict(self, response):
         """
