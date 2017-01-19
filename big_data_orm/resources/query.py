@@ -1,6 +1,10 @@
 import logging
 
 from big_data_orm.resources.column import Column
+from big_data_orm.resources.mock_data_generator import MockDataGenerator
+
+
+NUMBER_OF_MOCK_SAMPLES = 10
 
 
 class Query(object):
@@ -35,14 +39,20 @@ class Query(object):
         self.query_data['orders'].append(order)
         return self
 
-    def all(self, session, newest_only=False, filter_key=''):
+    def all(self, session, newest_only=False, filter_key='', debug=False):
+        if debug:
+            mock_generator = MockDataGenerator()
+            return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
         query = self.assemble()
         return session.run_query(query, newest_only=newest_only, filter_key=filter_key)
 
-    def first(self, session, newest_only=False, filter_key=''):
+    def first(self, session, newest_only=False, filter_key='', debug=False):
         """
         Return the first element as a dict
         """
+        if debug:
+            mock_generator = MockDataGenerator()
+            return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
         query = self.assemble()
         response = session.run_query(query, newest_only=newest_only, filter_key=filter_key)
         try:
