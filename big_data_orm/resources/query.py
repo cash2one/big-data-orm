@@ -39,14 +39,18 @@ class Query(object):
         self.query_data['orders'].append(order)
         return self
 
-    def all(self, session, newest_only=False, filter_key='', debug=False):
+    def all(self, session, newest_only=False, debug=False):
+        """
+        Return all the results from BigQuery
+        """
         if debug:
             mock_generator = MockDataGenerator()
             return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
         query = self.assemble()
+        filter_key = self._get_filter_key()
         return session.run_query(query, newest_only=newest_only, filter_key=filter_key)
 
-    def first(self, session, newest_only=False, filter_key='', debug=False):
+    def first(self, session, newest_only=False, debug=False):
         """
         Return the first element as a dict
         """
@@ -54,6 +58,7 @@ class Query(object):
             mock_generator = MockDataGenerator()
             return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
         query = self.assemble()
+        filter_key = self._get_filter_key()
         response = session.run_query(query, newest_only=newest_only, filter_key=filter_key)
         try:
             return response[0]
@@ -205,3 +210,18 @@ class Query(object):
             if column.name == column_name:
                 return True
         return False
+
+    def _get_filter_key(self):
+        if self.table_name == 'adwords_account_report':
+            return 'account_id'
+        elif self.table_name == 'adwords_campaign_report':
+            return 'campaign_id'
+        elif self.table_name == 'adwords_adgroup_report':
+            return 'adgroup_id'
+        elif self.table_name == 'adwords_ad_report':
+            return 'ad_id'
+        elif self.table_name == 'adwords_keyword_report':
+            return 'keyword_id'
+        else:
+            logging.warning("ORM couldnt find the right filter_key... Using account_id")
+            return 'account_id'
