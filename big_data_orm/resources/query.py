@@ -4,12 +4,17 @@ from big_data_orm.resources.column import Column
 from big_data_orm.resources.mock_data_generator import MockDataGenerator
 
 
+# The BigData ORM is not ready to filter tables by date.
+# For now, will just collect data from all tables and them aplly filters.
+BEGIN_DATE = '2010-01-01'
+END_DATE = '2030-01-01'
+
 NUMBER_OF_MOCK_SAMPLES = 10
 
 
 class Query(object):
     def __init__(self, columns, table_name):
-        self.table_name = table_name
+        self.table_name = 'test_adwords_report_data.' + table_name
         self.query_data = {}
         self.columns = columns
         self.query_data['columns'] = self.columns
@@ -72,7 +77,8 @@ class Query(object):
         return self
 
     def assemble(self):
-        sql_query = 'SELECT {} FROM {}'
+        sql_query = str('SELECT {} FROM TABLE_DATE_RANGE' +
+                        '({}, TIMESTAMP(\'{}\'), TIMESTAMP(\'{}\'))')
         fields = ''
         for column in self.columns:
             fields += str(column.name) + ', '
@@ -87,7 +93,7 @@ class Query(object):
         if 'limit' in self.query_data.keys():
             sql_query += self._build_limit_clause()
 
-        return sql_query.format(fields, self.table_name, '')
+        return sql_query.format(fields, self.table_name, BEGIN_DATE, END_DATE)
 
     def _build_limit_clause(self):
         return ' LIMIT {}'.format(self.query_data['limit']['value'])

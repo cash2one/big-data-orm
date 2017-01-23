@@ -24,12 +24,16 @@ class fakeSessionEmptyData():
 
 
 class QueryTestCase(unittest.TestCase):
+    table_date_range = 'TABLE_DATE_RANGE(test_adwords_report_data.testing, ' +\
+        'TIMESTAMP(\'2010-01-01\'), TIMESTAMP(\'2030-01-01\'))'
+
     def test_query_simple_1(self):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name)
-        expected_response = 'SELECT column_1, column_2 FROM testing'
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -39,7 +43,8 @@ class QueryTestCase(unittest.TestCase):
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name)
         q = q.limit(100)
-        expected_response = 'SELECT column_1, column_2 FROM testing LIMIT 100'
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' LIMIT 100'
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -50,7 +55,8 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name)
         q = q.limit(100)
         q = q.limit(101)
-        expected_response = 'SELECT column_1, column_2 FROM testing LIMIT 101'
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' LIMIT 101'
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -60,7 +66,8 @@ class QueryTestCase(unittest.TestCase):
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name)
         q = q.order_by(c_1)
-        expected_response = 'SELECT column_1, column_2 FROM testing ORDER BY column_1'
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' ORDER BY column_1'
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -71,7 +78,8 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name)
         q = q.order_by(c_1)
         q = q.order_by(c_2)
-        expected_response = 'SELECT column_1, column_2 FROM testing ORDER BY column_1 , column_2'
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' ORDER BY column_1 , column_2'
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -81,7 +89,8 @@ class QueryTestCase(unittest.TestCase):
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name)
         q = q.order_by(c_1, desc=True)
-        expected_response = 'SELECT column_1, column_2 FROM testing ORDER BY column_1 DESC'
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' ORDER BY column_1 DESC'
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -92,7 +101,8 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name)
         q = q.order_by(c_1, desc=True)
         q = q.order_by(c_2)
-        expected_response = 'SELECT column_1, column_2 FROM testing ORDER BY ' +\
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' ORDER BY ' +\
             'column_1 DESC , column_2'
         response = q.assemble()
         self.assertEquals(expected_response, response)
@@ -104,7 +114,8 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name)
         q = q.order_by(c_1, desc=True)
         q = q.order_by(c_2, desc=True)
-        expected_response = 'SELECT column_1, column_2 FROM testing ORDER BY ' +\
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' ORDER BY ' +\
             'column_1 DESC , column_2 DESC'
         response = q.assemble()
         self.assertEquals(expected_response, response)
@@ -115,7 +126,8 @@ class QueryTestCase(unittest.TestCase):
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name)
         q = q.filter(c_1 == 'test')
-        expected_response = 'SELECT column_1, column_2 FROM testing WHERE ' + \
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' WHERE ' + \
             'column_1 = \'test\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
@@ -127,7 +139,8 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name)
         # Wrong comparision
         q = q.filter(c_1 == 10)
-        expected_response = 'SELECT column_1, column_2 FROM testing'
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -139,7 +152,8 @@ class QueryTestCase(unittest.TestCase):
         # Wrong comparision
         q = q.filter(c_1 == 'test')
         q = q.filter(c_2 == 'test2')
-        expected_response = 'SELECT column_1, column_2 FROM testing WHERE ' + \
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' WHERE ' + \
             'column_1 = \'test\' and column_2 = \'test2\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
@@ -151,7 +165,8 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name)
         q = q.filter(c_1 >= 'test')
         q = q.filter(c_2 == 'test2')
-        expected_response = 'SELECT column_1, column_2 FROM testing WHERE ' + \
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' WHERE ' + \
             'column_1 >= \'test\' and column_2 = \'test2\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
@@ -164,7 +179,8 @@ class QueryTestCase(unittest.TestCase):
         q = q.filter(c_1 >= 'test')
         # Wrong comparision
         q = q.filter(c_2 == 100)
-        expected_response = 'SELECT column_1, column_2 FROM testing WHERE ' + \
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            self.table_date_range + ' WHERE ' + \
             'column_1 >= \'test\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
@@ -207,7 +223,7 @@ class QueryTestCase(unittest.TestCase):
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name)
         response = q.all(fakeSessionValidData)
-        self.assertEqual([{'a': 10},{'b': 20}], response)
+        self.assertEqual([{'a': 10}, {'b': 20}], response)
 
     def test_all_2(self):
         table_name = 'testing'
