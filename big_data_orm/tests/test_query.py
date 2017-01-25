@@ -4,6 +4,9 @@ from big_data_orm.resources.query import Query
 from big_data_orm.resources.column import Column
 
 
+DATABASE_NAME = 'adwords_report_data'
+
+
 class fakeSessionValidData():
     @staticmethod
     def run_query(query, newest_only=False, filter_key=''):
@@ -24,8 +27,8 @@ class fakeSessionEmptyData():
 
 
 class QueryTestCase(unittest.TestCase):
-    table_date_range = 'TABLE_DATE_RANGE(test_adwords_report_data.testing, ' +\
-        'TIMESTAMP(\'2010-01-01\'), TIMESTAMP(\'2030-01-01\'))'
+    table_date_range = ''+ DATABASE_NAME +'.testing WHERE _PARTITIONTIME BETWEEN ' +\
+        'TIMESTAMP(\'2010-01-01\') AND TIMESTAMP(\'2030-01-01\')'
 
     def test_query_simple_1(self):
         table_name = 'testing'
@@ -127,7 +130,7 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name)
         q = q.filter(c_1 == 'test')
         expected_response = 'SELECT column_1, column_2 FROM ' + \
-            self.table_date_range + ' WHERE ' + \
+            self.table_date_range + ' AND ' + \
             'column_1 = \'test\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
@@ -153,8 +156,8 @@ class QueryTestCase(unittest.TestCase):
         q = q.filter(c_1 == 'test')
         q = q.filter(c_2 == 'test2')
         expected_response = 'SELECT column_1, column_2 FROM ' + \
-            self.table_date_range + ' WHERE ' + \
-            'column_1 = \'test\' and column_2 = \'test2\''
+            self.table_date_range + ' AND ' + \
+            'column_1 = \'test\' AND column_2 = \'test2\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -166,8 +169,8 @@ class QueryTestCase(unittest.TestCase):
         q = q.filter(c_1 >= 'test')
         q = q.filter(c_2 == 'test2')
         expected_response = 'SELECT column_1, column_2 FROM ' + \
-            self.table_date_range + ' WHERE ' + \
-            'column_1 >= \'test\' and column_2 = \'test2\''
+            self.table_date_range + ' AND ' + \
+            'column_1 >= \'test\' AND column_2 = \'test2\''
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
@@ -180,7 +183,7 @@ class QueryTestCase(unittest.TestCase):
         # Wrong comparision
         q = q.filter(c_2 == 100)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
-            self.table_date_range + ' WHERE ' + \
+            self.table_date_range + ' AND ' + \
             'column_1 >= \'test\''
         response = q.assemble()
         self.assertEquals(expected_response, response)

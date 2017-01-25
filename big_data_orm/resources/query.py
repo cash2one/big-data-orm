@@ -14,7 +14,7 @@ NUMBER_OF_MOCK_SAMPLES = 10
 
 class Query(object):
     def __init__(self, columns, table_name):
-        self.table_name = 'test_adwords_report_data.' + table_name
+        self.table_name = 'adwords_report_data.' + table_name
         self.query_data = {}
         self.columns = columns
         self.query_data['columns'] = self.columns
@@ -77,8 +77,8 @@ class Query(object):
         return self
 
     def assemble(self):
-        sql_query = str('SELECT {} FROM TABLE_DATE_RANGE' +
-                        '({}, TIMESTAMP(\'{}\'), TIMESTAMP(\'{}\'))')
+        sql_query = str('SELECT {} FROM {} ' +
+                        'WHERE _PARTITIONTIME BETWEEN TIMESTAMP(\'{}\') AND TIMESTAMP(\'{}\')')
         fields = ''
         for column in self.columns:
             fields += str(column.name) + ', '
@@ -124,7 +124,7 @@ class Query(object):
             Example:
                 "WHERE foo == 10 and bar < 1 OR bar > -1"
         """
-        query = ' WHERE '
+        query = ' AND '
         not_first_clause = False
         for filter_clause in self.query_data['filters']:
             if filter_clause['type'] is 'and':
@@ -149,7 +149,7 @@ class Query(object):
         """
         partial_query = ''
         if not_first_clause:
-            partial_query += ' and '
+            partial_query += ' AND '
         partial_query += self._build_clause_core(filter_clause)
         return partial_query
 
