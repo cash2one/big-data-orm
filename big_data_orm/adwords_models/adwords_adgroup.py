@@ -4,7 +4,7 @@ from big_data_orm.resources.base_model import BaseModel
 
 class AdwordsAdgroup(BaseModel):
     def __init__(self):
-        self.__tablename__ = 'adwords_adgroup_report'
+        self.__tablename__ = 'adgroup_report'
         self.id = Column(str, 'id')
         self.created_time = Column(int, 'created_time')
         self.account_id = Column(str, 'account_id')
