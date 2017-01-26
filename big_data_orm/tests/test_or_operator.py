@@ -6,7 +6,7 @@ from big_data_orm.resources.query import Query
 from big_data_orm.resources.or_operator import or_
 
 
-DATABASE_NAME = 'adwords_report_data'
+DATABASE_NAME = 'adwords_data'
 
 
 class OROperatorTestCase(unittest.TestCase):
@@ -16,7 +16,7 @@ class OROperatorTestCase(unittest.TestCase):
         q = Query([c_1, c_2], 'test')
         q.filter(or_(c_1 == 'test_1', c_2 == 10))
         expected_query = 'SELECT c1, c2 FROM ' +\
-            'adwords_report_data.test WHERE _PARTITIONTIME BETWEEN ' +\
+            '' + DATABASE_NAME + '.test WHERE _PARTITIONTIME BETWEEN ' +\
             'TIMESTAMP(\'2010-01-01\') AND ' +\
             'TIMESTAMP(\'2030-01-01\')' +\
             ' AND c1 = \'test_1\' OR c2 = 10'

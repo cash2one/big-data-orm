@@ -4,7 +4,7 @@ from big_data_orm.resources.query import Query
 from big_data_orm.resources.column import Column
 
 
-DATABASE_NAME = 'adwords_report_data'
+DATABASE_NAME = 'adwords_data'
 
 
 class fakeSessionValidData():
