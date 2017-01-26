@@ -14,7 +14,7 @@ NUMBER_OF_MOCK_SAMPLES = 10
 
 class Query(object):
     def __init__(self, columns, table_name):
-        self.table_name = 'adwords_report_data.' + table_name
+        self.table_name = 'adwords_data.' + table_name
         self.query_data = {}
         self.columns = columns
         self.query_data['columns'] = self.columns
