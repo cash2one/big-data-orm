@@ -22,7 +22,7 @@ class MockDataGenerator(object):
                 else:
                     single_mock_data[column.name] = self.generate_string()
 
-                all_mocked_data.append(single_mock_data)
+            all_mocked_data.append(single_mock_data)
         return all_mocked_data
 
     def generate_string(self):
