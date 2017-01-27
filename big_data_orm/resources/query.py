@@ -204,12 +204,14 @@ class Query(object):
         query columns.
         """
         if not self._column_is_present(op['left_value']):
-            logging.error("Column not present at query columns.")
+            logging.error("Column (left_value) not present at query columns.")
             return False
         if op['right_value_type'] is Column:
             if not self._column_is_present(op['right_value']):
-                logging.error("Column not present at query columns.")
+                logging.error("Column (right_value) not present at query columns.")
                 return False
+            return True
+        return True
 
     def _column_is_present(self, column_name):
         for column in self.columns:
