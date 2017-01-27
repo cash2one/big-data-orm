@@ -30,4 +30,4 @@ setup(
 
 ## Usage
 
-[Wiki](https://github.com/devraccoon/big-data-orm/wiki/BigQuery-ORM---Instructions)
+For more information, please check the [Wiki](https://github.com/devraccoon/big-data-orm/wiki/BigQuery-ORM---Instructions)
