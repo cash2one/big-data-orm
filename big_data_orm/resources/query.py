@@ -14,6 +14,8 @@ NUMBER_OF_MOCK_SAMPLES = 10
 
 class Query(object):
     def __init__(self, columns, table_name):
+        self.begin_date = BEGIN_DATE
+        self.end_date = END_DATE
         self.table_name = 'adwords_data.' + table_name
         self.query_data = {}
         self.columns = columns
@@ -29,6 +31,14 @@ class Query(object):
         if 'filters' not in self.query_data.keys():
             self.query_data['filters'] = []
         self.query_data['filters'].append(clause)
+        return self
+
+    def filter_by_date(self, begin_date, end_date):
+        """
+        Define the begin and end date for the partitions that will be included.
+        """
+        self.begin_date = begin_date
+        self.end_date = end_date
         return self
 
     def order_by(self, column, desc=False):
@@ -93,7 +103,7 @@ class Query(object):
         if 'limit' in self.query_data.keys():
             sql_query += self._build_limit_clause()
 
-        return sql_query.format(fields, self.table_name, BEGIN_DATE, END_DATE)
+        return sql_query.format(fields, self.table_name, self.begin_date, self.end_date)
 
     def _build_limit_clause(self):
         return ' LIMIT {}'.format(self.query_data['limit']['value'])

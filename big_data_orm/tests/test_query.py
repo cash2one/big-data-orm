@@ -27,7 +27,7 @@ class fakeSessionEmptyData():
 
 
 class QueryTestCase(unittest.TestCase):
-    table_date_range = ''+ DATABASE_NAME +'.testing WHERE _PARTITIONTIME BETWEEN ' +\
+    table_date_range = '' + DATABASE_NAME + '.testing WHERE _PARTITIONTIME BETWEEN ' +\
         'TIMESTAMP(\'2010-01-01\') AND TIMESTAMP(\'2030-01-01\')'
 
     def test_query_simple_1(self):
@@ -38,6 +38,58 @@ class QueryTestCase(unittest.TestCase):
         expected_response = 'SELECT column_1, column_2 FROM ' + \
             self.table_date_range
         response = q.assemble()
+        self.assertEquals(expected_response, response)
+
+    def test_get_filter_keys(self):
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], "")
+        table_name = 'adwords_account_report'
+        q.table_name = table_name
+        key = q._get_filter_key()
+        self.assertEquals(key, 'account_id')
+
+        table_name = 'adwords_campaign_report'
+        q.table_name = table_name
+        q.table_name = table_name
+        key = q._get_filter_key()
+        self.assertEquals(key, 'campaign_id')
+
+        table_name = 'adwords_adgroup_report'
+        q.table_name = table_name
+        key = q._get_filter_key()
+        self.assertEquals(key, 'adgroup_id')
+
+        table_name = 'adwords_ad_report'
+        q.table_name = table_name
+        key = q._get_filter_key()
+        self.assertEquals(key, 'ad_id')
+
+        table_name = 'adwords_keyword_report'
+        q.table_name = table_name
+        key = q._get_filter_key()
+        self.assertEquals(key, 'keyword_id')
+
+    def test_query_filter_by_date(self):
+        begin_date = '2015-12-01'
+        end_date = '2016-01-01'
+
+        table_date_range = '' + DATABASE_NAME + '.testing WHERE _PARTITIONTIME BETWEEN ' +\
+            'TIMESTAMP(\'' + begin_date + '\') AND TIMESTAMP' +\
+            '(\'' + end_date + '\')'
+
+        table_name = 'testing'
+
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+
+        q = Query([c_1, c_2], table_name).filter_by_date(begin_date, end_date)
+
+        expected_response = 'SELECT column_1, column_2 FROM ' + \
+            table_date_range
+
+        response = q.assemble()
+
         self.assertEquals(expected_response, response)
 
     def test_query_limit_1(self):
