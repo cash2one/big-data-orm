@@ -2,6 +2,7 @@ import unittest
 import mock
 
 from big_data_orm.big_query_connector.session import Session
+from big_data_orm.tests.mock_data import big_query_response
 
 
 class fakeStorage():
@@ -191,7 +192,6 @@ class SessionTestCase(unittest.TestCase):
     def test_is_finished_nope(self, fake_http, fake_discovery, fake_file_storage):
         fake_discovery.build.return_value = fakeService3
         fake_file_storage.return_value = fakeStorage
-
         s = self._build_session()
         s.connect()
         response = s._check_if_finished(10)
@@ -212,3 +212,51 @@ class SessionTestCase(unittest.TestCase):
         }
         response = s._get_job_id(fake_job)
         self.assertEquals('TEST', response)
+
+    def test_query_data_extract_1(self):
+        s = self._build_session()
+        query = 'SELECT C1 FROM TABLE WHERE C1 != 100'
+        response = s._extract_data_from_query(query)
+        expected_response = {
+            'table': 'TABLE',
+            'fields': 'C1',
+            'after_where': ' C1 != 100',
+            'is_where': True
+        }
+        self.assertEqual(response, expected_response)
+
+    def test_query_data_extract_2(self):
+        s = self._build_session()
+        query = 'SELECT C1 FROM TABLE'
+        response = s._extract_data_from_query(query)
+        expected_response = {
+            'table': 'TABLE',
+            'fields': 'C1',
+            'after_where': '',
+            'is_where': False
+        }
+        self.assertEqual(response, expected_response)
+
+    def test_query_data_extract_3(self):
+        s = self._build_session()
+        query = 'SELECT_WOW C1 FROM TABLE'
+        response = s._extract_data_from_query(query)
+        expected_response = {}
+        self.assertEqual(response, expected_response)
+
+    def test_build_response_1(self):
+        s = self._build_session()
+        response = s._build_simple_dict(big_query_response)
+        expected_response = [
+            {
+                'field_1': 'value_1',
+            }
+        ]
+        self.assertEqual(expected_response, response)
+
+    def test_build_response_2(self):
+        s = self._build_session()
+        wrong_response = {'tah': 'tum', 'tahtah': 'tum'}
+        response = s._build_simple_dict(wrong_response)
+        expected_response = wrong_response
+        self.assertEqual(expected_response, response)
