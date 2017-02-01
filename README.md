@@ -2,9 +2,10 @@
 
 ORM to collect data from Raccoon BigData.
 
-**master:** [![Build Status](https://travis-ci.org/devraccoon/big-data-orm.svg?branch=master)](https://travis-ci.org/devraccoon/big-data-orm)
-
-**sprint:** [![Build Status](https://travis-ci.org/devraccoon/big-data-orm.svg?branch=sprint)](https://travis-ci.org/devraccoon/big-data-orm)
+Branch | Status
+-------|-------
+**master:** | [![Build Status](https://travis-ci.org/devraccoon/big-data-orm.svg?branch=master)](https://travis-ci.org/devraccoon/big-data-orm)
+**sprint:** | [![Build Status](https://travis-ci.org/devraccoon/big-data-orm.svg?branch=sprint)](https://travis-ci.org/devraccoon/big-data-orm)
 
 ## Install
 
