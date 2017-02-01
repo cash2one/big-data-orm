@@ -28,7 +28,7 @@ class OROperatorTestCase(unittest.TestCase):
         q = Query([c_1, c_2], 'test')
         q.filter(or_(c_1 == 10, c_2 == 10))
         expected_query = 'SELECT c1, c2 FROM ' +\
-            ''+ DATABASE_NAME +'.test WHERE _PARTITIONTIME BETWEEN ' +\
+            '' + DATABASE_NAME + '.test WHERE _PARTITIONTIME BETWEEN ' +\
             'TIMESTAMP(\'2010-01-01\') AND ' +\
             'TIMESTAMP(\'2030-01-01\')'
         self.assertEquals(q.assemble(), expected_query)
@@ -40,7 +40,7 @@ class OROperatorTestCase(unittest.TestCase):
         q.filter(or_(c_1 == 'test_1', c_2 == 10))
         q = q.filter(c_1 == 'test_2')
         expected_query = 'SELECT c1, c2 FROM ' +\
-            ''+ DATABASE_NAME +'.test WHERE _PARTITIONTIME BETWEEN ' +\
+            '' + DATABASE_NAME + '.test WHERE _PARTITIONTIME BETWEEN ' +\
             'TIMESTAMP(\'2010-01-01\') AND ' +\
             'TIMESTAMP(\'2030-01-01\')' +\
             ' AND c1 = \'test_1\' OR c2 = 10' +\
@@ -54,8 +54,20 @@ class OROperatorTestCase(unittest.TestCase):
         q.filter(or_(c_1 == 10, c_2 == 10))
         q = q.filter(c_1 == 'test_2')
         expected_query = 'SELECT c1, c2 FROM ' +\
-            ''+ DATABASE_NAME +'.test WHERE _PARTITIONTIME BETWEEN ' +\
+            '' + DATABASE_NAME + '.test WHERE _PARTITIONTIME BETWEEN ' +\
             'TIMESTAMP(\'2010-01-01\') AND ' +\
             'TIMESTAMP(\'2030-01-01\')' +\
             ' AND c1 = \'test_2\''
         self.assertEquals(q.assemble(), expected_query)
+
+    def basic_test_5(self):
+        c_2 = Column(int, 'c2')
+        r = or_('test', c_2 == 10)
+        self.assertEqual(r, {})
+
+    def basic_test_56(self):
+        c_1 = Column(str, 'c1')
+        c_2 = Column(int, 'c2')
+        r = or_(c_1 == 'test', c_2 == 10)
+        self.assertEqual(r, {'type': 'or', 'left_side': c_1 == 'test',
+                             'right_side': c_2 == 10})
