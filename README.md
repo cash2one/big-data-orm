@@ -6,27 +6,34 @@ ORM to collect data from Raccoon BigData.
 ### pip
 
 ```
-pip install git+https://github.com/devraccoon/big-data-orm
+pip install --extra-index-url https://pypi.raccoon.ag big-data-orm
 ```
 
-### setup.py
+### requirements.txt
 
-``` python
+```
+--extra-index-url https://pypi.raccoon.ag
+
+...
+big-data-orm
+```
+
+#### setup.py
+
+```python
 setup(
-    ...
-    install_requires=[
-        ...
-        'big-data-orm',
-        ...
-        ],
-    ...
-    dependency_links=[
-        ...
-        'https://github.com/devraccoon/big-data-orm/tarball/master#egg=big-data-orm'
-        ...
-    ]
+...
+install_requires=[
+...
+'big-data-orm',
+...
+],
+...
+dependency_links=['https://pypi.raccoon.ag/simple/big-data-orm'],
+...
 )
 ```
+
 
 ## Usage
 
