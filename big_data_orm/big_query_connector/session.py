@@ -131,7 +131,7 @@ class Session(object):
                 new_response.append(new_row)
             return new_response
         except KeyError:
-            logging.error("Invalid BigQuery response. Returning full response as it is.")
+            logging.debug("Invalid BigQuery response. Returning full response as it is.")
             return response
 
     def _extract_data_from_query(self, query):
