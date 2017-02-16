@@ -39,7 +39,7 @@ class Query(object):
         Define the begin and end date for the partitions that will be included.
         """
         if not self._check_date_args(begin_date) or not self._check_date_args(end_date):
-            logging.warning("Wow, invalid arguments. Must be \'YEAR-MM-DD\'")
+            logging.warning("Invalid filter_by_date arguments. Must be \'YEAR-MM-DD\'")
             return self
         self.begin_date = begin_date
         self.end_date = end_date
