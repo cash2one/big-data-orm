@@ -1,11 +1,23 @@
 import logging
+import re
 
 from big_data_orm.resources.column import Column
+from big_data_orm.resources.mock_data_generator import MockDataGenerator
+
+
+# The BigData ORM is not ready to filter tables by date.
+# For now, will just collect data from all tables and them aplly filters.
+BEGIN_DATE = '2010-01-01'
+END_DATE = '2030-01-01'
+
+NUMBER_OF_MOCK_SAMPLES = 10
 
 
 class Query(object):
     def __init__(self, columns, table_name):
-        self.table_name = table_name
+        self.begin_date = BEGIN_DATE
+        self.end_date = END_DATE
+        self.table_name = 'adwords_data.' + table_name
         self.query_data = {}
         self.columns = columns
         self.query_data['columns'] = self.columns
@@ -22,6 +34,22 @@ class Query(object):
         self.query_data['filters'].append(clause)
         return self
 
+    def filter_by_date(self, begin_date, end_date):
+        """
+        Define the begin and end date for the partitions that will be included.
+        """
+        if not self._check_date_args(begin_date) or not self._check_date_args(end_date):
+            logging.warning("Invalid filter_by_date arguments. Must be \'YEAR-MM-DD\'")
+            logging.warning("Using 2010-01-01 and 2030-01-01 as date filters.")
+            return self
+        self.begin_date = begin_date
+        self.end_date = end_date
+        return self
+
+    def _check_date_args(self, argument):
+        pattern = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+        return pattern.match(argument)
+
     def order_by(self, column, desc=False):
         if not self._column_is_present(column.name):
             logging.error("Trying to order by a non existing column.")
@@ -35,15 +63,30 @@ class Query(object):
         self.query_data['orders'].append(order)
         return self
 
-    def all(self, session, newest_only=False, filter_key=''):
+    def all(self, session, newest_only=False, debug=False):
+        """
+        Return all the results from BigQuery
+        """
+        if debug:
+            mock_generator = MockDataGenerator()
+            return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
         query = self.assemble()
+        filter_key = ""
+        if newest_only:
+            filter_key = self._get_filter_key()
         return session.run_query(query, newest_only=newest_only, filter_key=filter_key)
 
-    def first(self, session, newest_only=False, filter_key=''):
+    def first(self, session, newest_only=False, debug=False):
         """
         Return the first element as a dict
         """
+        if debug:
+            mock_generator = MockDataGenerator()
+            return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
         query = self.assemble()
+        filter_key = ""
+        if newest_only:
+            filter_key = self._get_filter_key()
         response = session.run_query(query, newest_only=newest_only, filter_key=filter_key)
         try:
             return response[0]
@@ -57,7 +100,8 @@ class Query(object):
         return self
 
     def assemble(self):
-        sql_query = 'SELECT {} FROM {}'
+        sql_query = str('SELECT {} FROM {} ' +
+                        'WHERE _PARTITIONTIME BETWEEN TIMESTAMP(\'{}\') AND TIMESTAMP(\'{}\')')
         fields = ''
         for column in self.columns:
             fields += str(column.name) + ', '
@@ -72,7 +116,7 @@ class Query(object):
         if 'limit' in self.query_data.keys():
             sql_query += self._build_limit_clause()
 
-        return sql_query.format(fields, self.table_name, '')
+        return sql_query.format(fields, self.table_name, self.begin_date, self.end_date)
 
     def _build_limit_clause(self):
         return ' LIMIT {}'.format(self.query_data['limit']['value'])
@@ -103,7 +147,7 @@ class Query(object):
             Example:
                 "WHERE foo == 10 and bar < 1 OR bar > -1"
         """
-        query = ' WHERE '
+        query = ' AND '
         not_first_clause = False
         for filter_clause in self.query_data['filters']:
             if filter_clause['type'] is 'and':
@@ -128,7 +172,7 @@ class Query(object):
         """
         partial_query = ''
         if not_first_clause:
-            partial_query += ' and '
+            partial_query += ' AND '
         partial_query += self._build_clause_core(filter_clause)
         return partial_query
 
@@ -183,15 +227,32 @@ class Query(object):
         query columns.
         """
         if not self._column_is_present(op['left_value']):
-            logging.error("Column not present at query columns.")
+            logging.error("Column (left_value) not present at query columns.")
             return False
         if op['right_value_type'] is Column:
             if not self._column_is_present(op['right_value']):
-                logging.error("Column not present at query columns.")
+                logging.error("Column (right_value) not present at query columns.")
                 return False
+            return True
+        return True
 
     def _column_is_present(self, column_name):
         for column in self.columns:
             if column.name == column_name:
                 return True
         return False
+
+    def _get_filter_key(self):
+        if self.table_name == 'adwords_account_report':
+            return 'account_id'
+        elif self.table_name == 'adwords_campaign_report':
+            return 'campaign_id'
+        elif self.table_name == 'adwords_adgroup_report':
+            return 'adgroup_id'
+        elif self.table_name == 'adwords_ad_report':
+            return 'ad_id'
+        elif self.table_name == 'adwords_keyword_report':
+            return 'keyword_id'
+        else:
+            logging.warning("ORM couldnt find the right filter_key... Using account_id")
+            return 'account_id'

@@ -4,7 +4,7 @@ from big_data_orm.resources.base_model import BaseModel
 
 class AdwordsSearchTerm(BaseModel):
     def __init__(self):
-        self.__tablename__ = 'adwords_search_terms_report'
+        self.__tablename__ = 'search_terms_report'
         self.id = Column(str, 'id')
         self.adgroup_id = Column(str, 'adgroup_id')
         self.campaign_id = Column(str, 'campaign_id')

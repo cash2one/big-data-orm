@@ -131,7 +131,7 @@ class Session(object):
                 new_response.append(new_row)
             return new_response
         except KeyError:
-            logging.error("Invalid BigQuery response. Returning full response as it is.")
+            logging.debug("Invalid BigQuery response. Returning full response as it is.")
             return response
 
     def _extract_data_from_query(self, query):
@@ -142,10 +142,14 @@ class Session(object):
         Return:
             (dict) Data from query.
         """
-        regex = (r"(SELECT|select)\s(.*)\s(from|FROM)\s([a-z|\[|\]|_|\.]+)\s?(where|WHERE)?(.*)$")
+        regex = (r"(SELECT|select)\s(.*)\s(from|FROM)" +
+                 "\s([a-z|A-Z|\[|\]|_|\.]+)\s?(where|WHERE)?(.*)$")
 
         data = {}
         match = re.match(regex, query)
+        if not match:
+            logging.error("Invalid query: {}".format(query))
+            return {}
         data['fields'] = match.group(2)
         data['table'] = match.group(4)
         data['after_where'] = match.group(6)
