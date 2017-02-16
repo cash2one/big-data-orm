@@ -1,4 +1,5 @@
 import logging
+import re
 
 from big_data_orm.resources.column import Column
 from big_data_orm.resources.mock_data_generator import MockDataGenerator
@@ -37,9 +38,16 @@ class Query(object):
         """
         Define the begin and end date for the partitions that will be included.
         """
+        if not self._check_date_args(begin_date) or not self._check_date_args(end_date):
+            logging.warning("Wow, invalid arguments. Must be \'YEAR-MM-DD\'")
+            return self
         self.begin_date = begin_date
         self.end_date = end_date
         return self
+
+    def _check_date_args(self, argument):
+        pattern = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+        return pattern.match(argument)
 
     def order_by(self, column, desc=False):
         if not self._column_is_present(column.name):
@@ -62,7 +70,9 @@ class Query(object):
             mock_generator = MockDataGenerator()
             return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
         query = self.assemble()
-        filter_key = self._get_filter_key()
+        filter_key = ""
+        if newest_only:
+            filter_key = self._get_filter_key()
         return session.run_query(query, newest_only=newest_only, filter_key=filter_key)
 
     def first(self, session, newest_only=False, debug=False):
@@ -73,7 +83,9 @@ class Query(object):
             mock_generator = MockDataGenerator()
             return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
         query = self.assemble()
-        filter_key = self._get_filter_key()
+        filter_key = ""
+        if newest_only:
+            filter_key = self._get_filter_key()
         response = session.run_query(query, newest_only=newest_only, filter_key=filter_key)
         try:
             return response[0]
