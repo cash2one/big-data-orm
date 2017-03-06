@@ -18,27 +18,29 @@ class Column(object):
         if self.column_type is dict:
             if not self.children:
                 logging.error("Columns with type DICT must have children!")
-                return False
+                raise TypeError("Children argument must be a DICT")
             if type(self.children) is not dict:
                 logging.error("Columns with type DICT must have a DICT children!")
-                return False
+                raise TypeError("Children argument must be a DICT")
             if not self._check_valid_children(self.children):
-                return False
-        return True
+                raise TypeError("Children argument is not valid")
 
     def _check_valid_children(self, children):
         """
         If the Columns have children, all of they must be Columns.
         """
+        errors = 0
         for _key in children.keys():
             child = children.get(_key)
             if type(child) is Column:
                 child.name = self.name + '.' + child.name
                 setattr(self, _key, child)
-                return True
             else:
                 logging.error("Wrong field type at {}.{}".format(self.name, _key))
-                return False
+                errors = errors + 1
+        if errors > 0:
+            return False
+        return True
 
     def __eq__(self, value):
         return self._build_op_dict('=', value)
