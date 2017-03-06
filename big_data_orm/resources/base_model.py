@@ -49,5 +49,5 @@ class BaseModel(object):
             columns_obj = [getattr(self.__class__(), column) for column in columns]
             dict_fields_manipulator = DictFieldsManipulator()
             columns_obj = dict_fields_manipulator.change_dict_columns_names(columns_obj)
-            columns_obj = dict_fields_manipulator.get_valid_dict_children(columns_obj)
+            columns_obj = dict_fields_manipulator.get_valid_dict_children_leafs(columns_obj)
             return columns_obj

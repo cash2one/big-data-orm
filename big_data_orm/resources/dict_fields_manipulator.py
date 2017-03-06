@@ -20,7 +20,7 @@ class DictFieldsManipulator(object):
             return False
         return True
 
-    def get_valid_dict_children(self, columns):
+    def get_valid_dict_children_leafs(self, columns):
         for column in columns:
             if column.column_type is dict:
                 self.get_leaf_fields(column)
