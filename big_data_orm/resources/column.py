@@ -5,9 +5,42 @@ class Column(object):
     """
     Representation of a table column.
     """
-    def __init__(self, column_type, name):
+    def __init__(self, column_type=None, name=None, children=None):
         self.column_type = column_type
         self.name = name
+        self.children = children
+        self._check_valid_args()
+
+    def _check_valid_args(self):
+        """
+        Check if the args passed are valid.
+        """
+        if self.column_type is dict:
+            if not self.children:
+                logging.error("Columns with type DICT must have children!")
+                raise TypeError("Children argument must be a DICT")
+            if type(self.children) is not dict:
+                logging.error("Columns with type DICT must have a DICT children!")
+                raise TypeError("Children argument must be a DICT")
+            if not self._check_valid_children(self.children):
+                raise TypeError("Children argument is not valid")
+
+    def _check_valid_children(self, children):
+        """
+        If the Columns have children, all of they must be Columns.
+        """
+        errors = 0
+        for _key in children.keys():
+            child = children.get(_key)
+            if type(child) is Column:
+                child.name = self.name + '.' + child.name
+                setattr(self, _key, child)
+            else:
+                logging.error("Wrong field type at {}.{}".format(self.name, _key))
+                errors = errors + 1
+        if errors > 0:
+            return False
+        return True
 
     def __eq__(self, value):
         return self._build_op_dict('=', value)
@@ -26,6 +59,11 @@ class Column(object):
 
     def __lt__(self, value):
         return self._build_op_dict('<', value)
+
+    def get(self, key, fallback=None):
+        if key not in self.children.keys():
+            return fallback
+        return self.children.get(key)
 
     def in_(self, values):
         if type(values) is not list:

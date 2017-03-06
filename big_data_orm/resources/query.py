@@ -4,9 +4,6 @@ import re
 from big_data_orm.resources.column import Column
 from big_data_orm.resources.mock_data_generator import MockDataGenerator
 
-
-# The BigData ORM is not ready to filter tables by date.
-# For now, will just collect data from all tables and them aplly filters.
 BEGIN_DATE = '2010-01-01'
 END_DATE = '2030-01-01'
 

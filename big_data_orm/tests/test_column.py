@@ -127,3 +127,23 @@ class ColumnTestCase(unittest.TestCase):
         r = c_1.in_('t2')
         expected_r = {}
         self.assertEqual(expected_r, r)
+
+    def test_dict_type_wrong_args(self):
+        self.assertRaises(TypeError, Column, dict, 'c_1')
+        self.assertRaises(TypeError, Column, dict, 'c_1', 10)
+        self.assertRaises(TypeError, Column, dict, 'c_1', 'x')
+        self.assertRaises(TypeError, Column, dict, 'c_1', -10)
+        self.assertRaises(TypeError, Column, dict, 'c_1', 10.00)
+        self.assertRaises(TypeError, Column, dict, 'c_1', {})
+        self.assertRaises(TypeError, Column, dict, 'c_1', {'a': 10})
+
+    def test_dict_type_correct(self):
+        c_1 = Column(
+            dict, 'test_01',
+            {
+                'c_1_1': Column(str, 'wow')
+            }
+        )
+        self.assertEqual(type(c_1), Column)
+        self.assertEqual(c_1.name, 'test_01')
+        self.assertEqual(c_1.c_1_1.name, 'test_01.wow')
