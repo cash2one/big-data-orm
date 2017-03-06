@@ -11,13 +11,22 @@ NUMBER_OF_MOCK_SAMPLES = 10
 
 
 class Query(object):
-    def __init__(self, columns, table_name):
+    def __init__(self, columns, table_name, dataset_id, is_partitioned):
+        self.is_partitioned = is_partitioned
         self.begin_date = BEGIN_DATE
         self.end_date = END_DATE
-        self.table_name = 'adwords_data.' + table_name
+        self.table_name = dataset_id + '.' + table_name
         self.query_data = {}
         self.columns = columns
         self.query_data['columns'] = self.columns
+        self._check_column_types()
+        self.flatten_active = False
+
+    def _check_column_types(self):
+        for column in self.columns:
+            if column.column_type is dict:
+                logging.error("Trying to use DICT " +
+                              "columns at query. Please use the leaf column instead")
 
     def filter(self, clause):
         """
@@ -60,6 +69,11 @@ class Query(object):
         self.query_data['orders'].append(order)
         return self
 
+    def flatten(self, field):
+        self.table_name = "FLATTEN({}, {})".format(self.table_name, field.name)
+        self.flatten_active = True
+        return self
+
     def all(self, session, newest_only=False, debug=False):
         """
         Return all the results from BigQuery
@@ -97,8 +111,12 @@ class Query(object):
         return self
 
     def assemble(self):
-        sql_query = str('SELECT {} FROM {} ' +
-                        'WHERE _PARTITIONTIME BETWEEN TIMESTAMP(\'{}\') AND TIMESTAMP(\'{}\')')
+        if self.is_partitioned:
+            sql_query = str('SELECT {} FROM {} ' +
+                            'WHERE _PARTITIONTIME BETWEEN TIMESTAMP(\'{}\') AND TIMESTAMP(\'{}\')')
+        else:
+            sql_query = str('SELECT {} FROM {} ')
+
         fields = ''
         for column in self.columns:
             fields += str(column.name) + ', '
@@ -113,7 +131,10 @@ class Query(object):
         if 'limit' in self.query_data.keys():
             sql_query += self._build_limit_clause()
 
-        return sql_query.format(fields, self.table_name, self.begin_date, self.end_date)
+        if self.is_partitioned:
+            return sql_query.format(fields, self.table_name, self.begin_date, self.end_date)
+        else:
+            return sql_query.format(fields, self.table_name)
 
     def _build_limit_clause(self):
         return ' LIMIT {}'.format(self.query_data['limit']['value'])

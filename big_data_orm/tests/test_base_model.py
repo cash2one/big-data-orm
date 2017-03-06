@@ -4,6 +4,8 @@ from big_data_orm.resources.base_model import BaseModel
 from big_data_orm.resources.column import Column
 from big_data_orm.resources.query import Query
 
+DATABASE_NAME = 'adwords_data'
+
 
 class FakeModel(BaseModel):
     def __init__(self):
@@ -27,7 +29,7 @@ class BaseModelTestCase(unittest.TestCase):
         b = BaseModel()
         b.__tablename__ = 'Test'
         c_1 = Column(str, 'testing')
-        response = b.query(c_1)
+        response = b.query(c_1, dataset_id=DATABASE_NAME, is_partitioned=True)
         self.assertEqual(Query, type(response))
 
     def test_query_no_args(self):

@@ -146,4 +146,5 @@ class ColumnTestCase(unittest.TestCase):
         )
         self.assertEqual(type(c_1), Column)
         self.assertEqual(c_1.name, 'test_01')
-        self.assertEqual(c_1.c_1_1.name, 'test_01.wow')
+        # Nested names are made at query module
+        self.assertEqual(c_1.c_1_1.name, 'wow')
