@@ -115,7 +115,7 @@ class Query(object):
             sql_query = str('SELECT {} FROM {} ' +
                             'WHERE _PARTITIONTIME BETWEEN TIMESTAMP(\'{}\') AND TIMESTAMP(\'{}\')')
         else:
-            sql_query = str('SELECT {} FROM {} ')
+            sql_query = str('SELECT {} FROM {}')
 
         fields = ''
         for column in self.columns:

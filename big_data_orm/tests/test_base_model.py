@@ -13,8 +13,26 @@ class FakeModel(BaseModel):
         self.c_2 = Column(str, 'test_2')
 
 
-class BaseModelTestCase(unittest.TestCase):
+class FakeModel2(BaseModel):
+    def __init__(self):
+        self.c_1 = Column(str, 'test_1')
+        self.c_2 = Column(str, 'test_2')
+        self.c_3 = Column(
+            dict, 'test_3',
+            {
+                'c_3_1': Column(
+                        dict, 'test_3_1',
+                        {
+                            'c_3_1_1': Column(int, 'test_3_1_1'),
+                            'c_3_1_2': Column(str, 'test_3_1_2')
+                        }
+                    ),
+                'c_3_2': Column(str, 'test_3_2')
+            }
+        )
 
+
+class BaseModelTestCase(unittest.TestCase):
     def test_table_name(self):
         b = BaseModel()
         self.assertEqual(None, b.__tablename__)
@@ -47,3 +65,21 @@ class BaseModelTestCase(unittest.TestCase):
         b = FakeModel()
         response = b._get_all_columns()
         self.assertEqual([b.c_1, b.c_2], response)
+
+    def test_get_all_columns_3(self):
+        b = FakeModel2()
+        response = b._get_all_columns()
+
+        expected_response = [
+            'test_1', 'test_2',
+            'test_3.test_3_1.test_3_1_2',
+            'test_3.test_3_1.test_3_1_1',
+            'test_3.test_3_2'
+        ]
+
+        response_names = []
+        for column in response:
+            response_names.append(column.name)
+
+        self.assertEqual(len(response), len(expected_response))
+        self.assertListEqual(response_names, expected_response)

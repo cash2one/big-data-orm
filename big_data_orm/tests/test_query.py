@@ -292,3 +292,19 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         response = q.all(fakeSessionEmptyData)
         self.assertEqual({}, response)
+
+    def test_query_flatten(self):
+        table_name = 'testing'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query(
+            [c_1, c_2], table_name,
+            dataset_id=DATABASE_NAME, is_partitioned=False
+        )
+        q = q.flatten(c_2)
+        expected_response = str(
+            "SELECT column_1, column_2 FROM "
+            "FLATTEN(" + DATABASE_NAME + "." + table_name + ", column_2)"
+        )
+        response = q.assemble()
+        self.assertEquals(expected_response, response)
