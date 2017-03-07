@@ -116,15 +116,16 @@ class Query(object):
         return self
 
     def assemble(self):
+        """
+        Build the query as a string.
+        """
         if self.is_partitioned:
             sql_query = str('SELECT {} FROM {} ' +
                             'WHERE _PARTITIONTIME BETWEEN TIMESTAMP(\'{}\') AND TIMESTAMP(\'{}\')')
         else:
             sql_query = str('SELECT {} FROM {}')
 
-        fields = ''
-        for column in self.columns:
-            fields += str(column.name) + ', '
+        fields = ''.join(str(column.name) + ', ' for column in self.columns)
         fields = fields[:-2]
 
         if 'filters' in self.query_data.keys():
@@ -148,17 +149,9 @@ class Query(object):
         query = ''
         not_first_clause = False
         for order in self.query_data['orders']:
-
-            if not not_first_clause:
-                order_or_comma = 'ORDER BY'
-            else:
-                order_or_comma = ','
-
-            if order['desc']:
-                query += ' {} {} DESC'.format(order_or_comma, order['column'])
-            else:
-                query += ' {} {}'.format(order_or_comma, order['column'])
-
+            order_or_comma = 'ORDER BY' if not not_first_clause else ','
+            query += ' {} {} DESC'.format(order_or_comma, order['column']) if order['desc'] \
+                else ' {} {}'.format(order_or_comma, order['column'])
             not_first_clause = True
         return query
 
@@ -193,9 +186,7 @@ class Query(object):
             Example: " field > 100".
             Or even " and test = 'raccoon'".
         """
-        partial_query = ''
-        if not_first_clause:
-            partial_query += ' AND '
+        partial_query = ' AND ' if not_first_clause else ''
         partial_query += self._build_clause_core(filter_clause)
         return partial_query
 
@@ -224,10 +215,8 @@ class Query(object):
             (str) String with the OR clause already built.
             Example: field = 'test' OR other_field = 'other_test'
         """
-        partial_query = ''
+        partial_query = ' and ' if not_first_clause else ''
         clause_sql = '{} OR {}'
-        if not_first_clause:
-            partial_query += ' and '
         clause_sql = clause_sql.format(
             self._build_clause_core(filter_clause['left_side']),
             self._build_clause_core(filter_clause['right_side'])
