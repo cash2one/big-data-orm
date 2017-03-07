@@ -2,7 +2,8 @@ import logging
 import re
 
 from big_data_orm.resources.column import Column
-from big_data_orm.resources.mock_data_generator import MockDataGenerator
+from big_data_orm.resources.utils.mock_data_generator import MockDataGenerator
+from big_data_orm.resources.utils.get_filter_keys import get_key
 
 BEGIN_DATE = '2010-01-01'
 END_DATE = '2030-01-01'
@@ -84,7 +85,9 @@ class Query(object):
         query = self.assemble()
         filter_key = ""
         if newest_only:
-            filter_key = self._get_filter_key()
+            filter_key = get_key(self.table_name)
+            if not filter_key:
+                newest_only = False
         return session.run_query(query, newest_only=newest_only, filter_key=filter_key)
 
     def first(self, session, newest_only=False, debug=False):
@@ -97,7 +100,9 @@ class Query(object):
         query = self.assemble()
         filter_key = ""
         if newest_only:
-            filter_key = self._get_filter_key()
+            filter_key = get_key(self.table_name)
+            if not filter_key:
+                newest_only = False
         response = session.run_query(query, newest_only=newest_only, filter_key=filter_key)
         try:
             return response[0]
@@ -259,18 +264,3 @@ class Query(object):
             if column.name == column_name:
                 return True
         return False
-
-    def _get_filter_key(self):
-        if self.table_name == 'adwords_account_report':
-            return 'account_id'
-        elif self.table_name == 'adwords_campaign_report':
-            return 'campaign_id'
-        elif self.table_name == 'adwords_adgroup_report':
-            return 'adgroup_id'
-        elif self.table_name == 'adwords_ad_report':
-            return 'ad_id'
-        elif self.table_name == 'adwords_keyword_report':
-            return 'keyword_id'
-        else:
-            logging.warning("ORM couldnt find the right filter_key... Using account_id")
-            return 'account_id'

@@ -1,6 +1,6 @@
 import unittest
 
-from big_data_orm.resources.dict_fields_manipulator import DictFieldsManipulator
+from big_data_orm.resources.utils.dict_fields_manipulator import DictFieldsManipulator
 from big_data_orm.resources.column import Column
 
 

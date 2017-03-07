@@ -1,5 +1,6 @@
 import unittest
 
+from mock import MagicMock
 from big_data_orm.resources.query import Query
 from big_data_orm.resources.column import Column
 
@@ -26,6 +27,11 @@ class fakeSessionEmptyData():
         return {}
 
 
+class fakeSessionWithMock():
+    def __init__(self):
+        self.run_query = MagicMock(return_value={})
+
+
 class QueryTestCase(unittest.TestCase):
     table_date_range = '' + DATABASE_NAME + '.testing WHERE _PARTITIONTIME BETWEEN ' +\
         'TIMESTAMP(\'2010-01-01\') AND TIMESTAMP(\'2030-01-01\')'
@@ -39,36 +45,6 @@ class QueryTestCase(unittest.TestCase):
             self.table_date_range
         response = q.assemble()
         self.assertEquals(expected_response, response)
-
-    def test_get_filter_keys(self):
-        c_1 = Column(str, 'column_1')
-        c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], "", dataset_id=DATABASE_NAME, is_partitioned=True)
-        table_name = 'adwords_account_report'
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'account_id')
-
-        table_name = 'adwords_campaign_report'
-        q.table_name = table_name
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'campaign_id')
-
-        table_name = 'adwords_adgroup_report'
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'adgroup_id')
-
-        table_name = 'adwords_ad_report'
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'ad_id')
-
-        table_name = 'adwords_keyword_report'
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'keyword_id')
 
     def test_query_filter_by_date(self):
         begin_date = '2015-12-01'
@@ -308,3 +284,56 @@ class QueryTestCase(unittest.TestCase):
         )
         response = q.assemble()
         self.assertEquals(expected_response, response)
+
+    # Todo: integration tests, should be separated.
+    def test_session_call_1(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'testing'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        query_str = q.assemble()
+        q.all(fake_session)
+        fake_session.run_query.assert_called_with(query_str, filter_key='', newest_only=False)
+
+    def test_session_call_2(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'testing'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        query_str = q.assemble()
+        q.all(fake_session, newest_only=False)
+        fake_session.run_query.assert_called_with(query_str, filter_key='', newest_only=False)
+
+    def test_session_call_3(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'adwords_account_report'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        query_str = q.assemble()
+        q.all(fake_session, newest_only=True)
+        fake_session.run_query.assert_called_with(
+            query_str, filter_key='account_id', newest_only=True
+        )
+
+    def test_session_call_4(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'adwords_account_report'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        self.assertRaises(TypeError, q.all, fake_session, newest_only=True, filter_key='nope')
+
+    def test_session_call_5(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'some_table_name'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        query_str = q.assemble()
+        q.all(fake_session, newest_only=True)
+        fake_session.run_query.assert_called_with(
+            query_str, filter_key='', newest_only=False
+        )
