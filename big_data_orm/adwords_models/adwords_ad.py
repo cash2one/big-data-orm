@@ -23,3 +23,6 @@ class AdwordsAd(BaseModel):
         self.adgroup_id = Column(str, 'adgroup_id')
         self.account_name = Column(str, 'account_name')
         self.created_time = Column(int, 'created_time')
+        self.data_time = Column(int, 'data_time')
+        self.all_conversion_value = Column(float, 'all_conversion_value')
+        self.total_conversion_value = Column(float, 'total_conversion_value')
