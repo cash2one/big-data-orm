@@ -20,3 +20,5 @@ class AdwordsSearchTerm(BaseModel):
         self.cost = Column(int, 'cost')
         self.average_position = Column(float, 'average_position')
         self.created_time = Column(int, 'created_time')
+        self.data_time = Column(int, 'data_time')
+        self.all_conversion_value = Column(float, 'all_conversion_value')

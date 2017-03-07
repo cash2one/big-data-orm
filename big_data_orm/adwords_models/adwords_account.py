@@ -28,3 +28,5 @@ class AdwordsAccount(BaseModel):
         self.average_position = Column(float, 'average_position')
         self.conversion_rate = Column(str, 'conversion_rate')
         self.cost = Column(int, 'cost')
+        self.data_time = Column(int, 'data_time')
+        self.total_conversion_value = Column(float, 'total_conversion_value')
