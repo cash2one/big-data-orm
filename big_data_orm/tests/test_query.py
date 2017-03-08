@@ -9,7 +9,7 @@ DATABASE_NAME = 'adwords_data'
 
 class fakeSessionValidData():
     @staticmethod
-    def run_query(query, newest_only=False, filter_key=''):
+    def run_query(query):
         return [
             {
                 'a': 10
@@ -22,7 +22,7 @@ class fakeSessionValidData():
 
 class fakeSessionEmptyData():
     @staticmethod
-    def run_query(query, newest_only=False, filter_key=''):
+    def run_query(query):
         return {}
 
 
