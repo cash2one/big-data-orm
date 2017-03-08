@@ -31,7 +31,7 @@ class AdwordsKeyword(BaseModel):
         self.converted_clicks = Column(int, 'converted_clicks')
         self.cost = Column(int, 'cost')
         self.cost_per_conversion = Column(int, 'cost_per_conversion')
-        self.cost_per_converted_clicks = Column(int, 'cost_per_converted_clicks')
+        self.cost_per_converted_click = Column(int, 'cost_per_converted_click')
         self.campaign_id = Column(str, 'campaign_id')
         self.data_time = Column(int, 'data_time')
         self.all_conversion_value = Column(float, 'all_conversion_value')

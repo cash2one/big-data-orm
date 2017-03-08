@@ -34,7 +34,7 @@ class Session(object):
         self.service = discovery.build(self.api_name, self.api_version, http=base_authentication)
         self.connected = True
 
-    def run_query(self, query, newest_only=False, filter_key=""):
+    def run_query(self, query):
         """
         Send a job request to BigQueryAPI with a SQL query.
         Args:
@@ -47,13 +47,6 @@ class Session(object):
         if not self.connected:
             logging.error("Session is not connected...")
             return {}
-
-        if newest_only:
-            if not filter_key:
-                print "Error: missing filter_key"
-                return {}
-            data_from_query = self._extract_data_from_query(query)
-            query = self._build_newest_only_query(data_from_query, filter_key)
 
         request_body = self._build_request_body(query)
         request = self.service.jobs().query(projectId=self.project_id, body=request_body)
@@ -159,29 +152,6 @@ class Session(object):
             data['is_where'] = False
 
         return data
-
-    def _build_newest_only_query(self, data, filter_key):
-        """
-        Insert in the middle of the query another select operation to retrieve
-        only the newest tuples.
-        Args:
-            data: (dict) data extract from the query.
-            filter_key: (str) tuple field used as a group by key.
-        Return:
-            (str) query modified.
-        """
-        base_query = "SELECT {} FROM ({}) {}"
-
-        middle_query = "SELECT *, MAX(created_time) OVER (PARTITION BY " +\
-            "{}) AS newest_time FROM {}".format(filter_key, data['table'])
-
-        if data['is_where']:
-            where_clause = "WHERE created_time = newest_time and {}".format(data['after_where'])
-        else:
-            where_clause = 'WHERE created_time = newest_time {}'.format(data['after_where'])
-
-        base_query = base_query.format(data['fields'], middle_query, where_clause)
-        return base_query
 
     def _build_request_body(self, query):
         """
