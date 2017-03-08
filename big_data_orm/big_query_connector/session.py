@@ -82,10 +82,7 @@ class Session(object):
         self.connect()
         request = self.service.jobs().get(projectId=self.project_id, jobId=job_id)
         response = request.execute()
-        if response['status']['state'] == 'DONE':
-            return True
-        else:
-            return False
+        return True if response['status']['state'] == 'DONE' else False
 
     def _get_job_id(self, job_json):
         """
@@ -153,10 +150,7 @@ class Session(object):
         data['fields'] = match.group(2)
         data['table'] = match.group(4)
         data['after_where'] = match.group(6)
-        if match.group(5):
-            data['is_where'] = True
-        else:
-            data['is_where'] = False
+        data['is_where'] = True if match.group(5) else False
 
         return data
 
@@ -175,11 +169,9 @@ class Session(object):
         middle_query = "SELECT *, MAX(created_time) OVER (PARTITION BY " +\
             "{}) AS newest_time FROM {}".format(filter_key, data['table'])
 
-        if data['is_where']:
-            where_clause = "WHERE created_time = newest_time and {}".format(data['after_where'])
-        else:
-            where_clause = 'WHERE created_time = newest_time {}'.format(data['after_where'])
-
+        where_clause = "WHERE created_time = newest_time"
+        where_clause += " and {}" if data['is_where'] else " {}"
+        where_clause.format(data['after_where'])
         base_query = base_query.format(data['fields'], middle_query, where_clause)
         return base_query
 
