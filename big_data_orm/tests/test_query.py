@@ -285,7 +285,7 @@ class QueryTestCase(unittest.TestCase):
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
-    def test_session_call_1(self):
+    def test_all_session_call_1(self):
         fake_session = fakeSessionWithMock()
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
@@ -295,17 +295,7 @@ class QueryTestCase(unittest.TestCase):
         q.all(fake_session)
         fake_session.run_query.assert_called_with(query_str)
 
-    def test_session_call_2(self):
-        fake_session = fakeSessionWithMock()
-        table_name = 'testing'
-        c_1 = Column(str, 'column_1')
-        c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
-        query_str = q.assemble()
-        q.all(fake_session)
-        fake_session.run_query.assert_called_with(query_str)
-
-    def test_session_call_3(self):
+    def test_all_session_call_2(self):
         fake_session = fakeSessionWithMock()
         table_name = 'adwords_account_report'
         c_1 = Column(str, 'column_1')
@@ -315,7 +305,7 @@ class QueryTestCase(unittest.TestCase):
         q.all(fake_session)
         fake_session.run_query.assert_called_with(query_str)
 
-    def test_session_call_4(self):
+    def test_all_session_call_3(self):
         fake_session = fakeSessionWithMock()
         table_name = 'adwords_account_report'
         c_1 = Column(str, 'column_1')
@@ -323,12 +313,12 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         self.assertRaises(TypeError, q.all, fake_session, newest_only=True, filter_key='nope')
 
-    def test_session_call_5(self):
+    def test_first_session_call_1(self):
         fake_session = fakeSessionWithMock()
-        table_name = 'some_table_name'
+        table_name = 'adwords_account_report'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         query_str = q.assemble()
-        q.all(fake_session)
+        q.first(fake_session)
         fake_session.run_query.assert_called_with(query_str)
