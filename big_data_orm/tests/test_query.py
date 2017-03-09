@@ -294,7 +294,7 @@ class QueryTestCase(unittest.TestCase):
         q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         query_str = q.assemble()
         q.all(fake_session)
-        fake_session.run_query.assert_called_with(query_str, filter_key='', newest_only=False)
+        fake_session.run_query.assert_called_with(query_str)
 
     def test_session_call_2(self):
         fake_session = fakeSessionWithMock()
@@ -303,8 +303,8 @@ class QueryTestCase(unittest.TestCase):
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         query_str = q.assemble()
-        q.all(fake_session, newest_only=False)
-        fake_session.run_query.assert_called_with(query_str, filter_key='', newest_only=False)
+        q.all(fake_session)
+        fake_session.run_query.assert_called_with(query_str)
 
     def test_session_call_3(self):
         fake_session = fakeSessionWithMock()
@@ -313,10 +313,8 @@ class QueryTestCase(unittest.TestCase):
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         query_str = q.assemble()
-        q.all(fake_session, newest_only=True)
-        fake_session.run_query.assert_called_with(
-            query_str, filter_key='account_id', newest_only=True
-        )
+        q.all(fake_session)
+        fake_session.run_query.assert_called_with(query_str)
 
     def test_session_call_4(self):
         fake_session = fakeSessionWithMock()
@@ -333,7 +331,5 @@ class QueryTestCase(unittest.TestCase):
         c_2 = Column(str, 'column_2')
         q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         query_str = q.assemble()
-        q.all(fake_session, newest_only=True)
-        fake_session.run_query.assert_called_with(
-            query_str, filter_key='', newest_only=False
-        )
+        q.all(fake_session)
+        fake_session.run_query.assert_called_with(query_str)

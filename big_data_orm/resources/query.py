@@ -3,7 +3,6 @@ import re
 
 from big_data_orm.resources.column import Column
 from big_data_orm.resources.utils.mock_data_generator import MockDataGenerator
-from big_data_orm.resources.utils.get_filter_keys import get_key
 
 BEGIN_DATE = '2010-01-01'
 END_DATE = '2030-01-01'
@@ -74,7 +73,7 @@ class Query(object):
         self.table_name = "FLATTEN({}, {})".format(self.table_name, field.name)
         self.flatten_active = True
         return self
-      
+
     def all(self, session, debug=False):
         """
         Return all the results from BigQuery
