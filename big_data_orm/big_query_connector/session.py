@@ -34,6 +34,44 @@ class Session(object):
         self.service = discovery.build(self.api_name, self.api_version, http=base_authentication)
         self.connected = True
 
+    def save_data(self, table_name, data):
+        """
+        Send data to BigQuery.
+        Args:
+            table_name: (str) Table name.
+            data: (list) List of dicts.
+        """
+        payload = self._prepare_request_payload(data)
+
+        request = self.service.tabledata().insertAll(
+            projectId=self.project_id, datasetId=self.dataset_id, tableId=table_name,
+            body=payload
+        )
+
+        if not self._execute_request(request):
+            print "Error while saving data."
+            return False
+        return True
+
+    def _prepare_request_payload(self, data):
+        """
+        Prepare the request payload to be sent to BigQuery.
+        """
+        request_payload = {
+            'kind': 'bigquery#tableDataInsertAllRequest',
+            'skipInvalidRows': True,
+            'ignoreUnknownValues': True,
+            'rows': []
+        }
+
+        for single_data in data:
+            big_query_format_row = {}
+            big_query_format_row['insertId'] = self._generate_row_id()
+            big_query_format_row['json'] = single_data
+            request_payload['rows'].append(big_query_format_row)
+
+        return request_payload
+
     def run_query(self, query):
         """
         Send a job request to BigQueryAPI with a SQL query.
