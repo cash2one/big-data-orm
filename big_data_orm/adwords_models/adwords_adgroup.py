@@ -36,3 +36,6 @@ class AdwordsAdgroup(BaseModel):
         self.cost_per_all_conversion = Column(int, 'cost_per_all_conversion')
         self.ctr = Column(str, 'ctr')
         self.impressions = Column(float, 'impressions')
+        self.data_time = Column(int, 'data_time')
+        self.all_conversion_value = Column(float, 'all_conversion_value')
+        self.total_conversion_value = Column(float, 'total_conversion_value')

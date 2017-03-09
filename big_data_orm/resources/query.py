@@ -74,36 +74,28 @@ class Query(object):
         self.table_name = "FLATTEN({}, {})".format(self.table_name, field.name)
         self.flatten_active = True
         return self
-
-    def all(self, session, newest_only=False, debug=False):
+      
+    def all(self, session, debug=False):
         """
         Return all the results from BigQuery
         """
         if debug:
             mock_generator = MockDataGenerator()
             return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
-        query = self.assemble()
-        filter_key = ""
-        if newest_only:
-            filter_key = get_key(self.table_name)
-            if not filter_key:
-                newest_only = False
-        return session.run_query(query, newest_only=newest_only, filter_key=filter_key)
 
-    def first(self, session, newest_only=False, debug=False):
+        query = self.assemble()
+        return session.run_query(query)
+
+    def first(self, session, debug=False):
         """
         Return the first element as a dict
         """
         if debug:
             mock_generator = MockDataGenerator()
             return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
+
         query = self.assemble()
-        filter_key = ""
-        if newest_only:
-            filter_key = get_key(self.table_name)
-            if not filter_key:
-                newest_only = False
-        response = session.run_query(query, newest_only=newest_only, filter_key=filter_key)
+        response = session.run_query(query)
         try:
             return response[0]
         except KeyError:
