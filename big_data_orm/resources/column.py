@@ -32,7 +32,7 @@ class Column(object):
 
     def _set_children_attr(self):
         """
-        If the Columns have children, all of they must be Columns.
+        Set a class attribute for each child column
         """
         for _key in self.children.keys():
             child = self.children.get(_key)
