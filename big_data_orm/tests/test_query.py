@@ -285,7 +285,6 @@ class QueryTestCase(unittest.TestCase):
         response = q.assemble()
         self.assertEquals(expected_response, response)
 
-    # Todo: integration tests, should be separated.
     def test_session_call_1(self):
         fake_session = fakeSessionWithMock()
         table_name = 'testing'
