@@ -2,7 +2,7 @@ import logging
 import re
 
 from big_data_orm.resources.column import Column
-from big_data_orm.resources.mock_data_generator import MockDataGenerator
+from big_data_orm.resources.utils.mock_data_generator import MockDataGenerator
 
 BEGIN_DATE = '2010-01-01'
 END_DATE = '2030-01-01'
@@ -11,13 +11,22 @@ NUMBER_OF_MOCK_SAMPLES = 10
 
 
 class Query(object):
-    def __init__(self, columns, table_name):
+    def __init__(self, columns, table_name, dataset_id, is_partitioned):
+        self.is_partitioned = is_partitioned
         self.begin_date = BEGIN_DATE
         self.end_date = END_DATE
-        self.table_name = 'adwords_data.' + table_name
+        self.table_name = dataset_id + '.' + table_name
         self.query_data = {}
         self.columns = columns
         self.query_data['columns'] = self.columns
+        self._check_column_types()
+        self.flatten_active = False
+
+    def _check_column_types(self):
+        for column in self.columns:
+            if column.column_type is dict:
+                logging.error("Trying to use DICT " +
+                              "columns at query. Please use the leaf column instead")
 
     def filter(self, clause):
         """
@@ -60,6 +69,11 @@ class Query(object):
         self.query_data['orders'].append(order)
         return self
 
+    def flatten(self, field):
+        self.table_name = "FLATTEN({}, {})".format(self.table_name, field.name)
+        self.flatten_active = True
+        return self
+
     def all(self, session, debug=False):
         """
         Return all the results from BigQuery
@@ -69,7 +83,6 @@ class Query(object):
             return mock_generator.generate_data(NUMBER_OF_MOCK_SAMPLES, self.columns)
 
         query = self.assemble()
-
         return session.run_query(query)
 
     def first(self, session, debug=False):
@@ -94,12 +107,16 @@ class Query(object):
         return self
 
     def assemble(self):
-        sql_query = str('SELECT {} FROM {} ' +
-                        'WHERE _PARTITIONTIME BETWEEN TIMESTAMP(\'{}\') AND TIMESTAMP(\'{}\')')
-        fields = ''
-        for column in self.columns:
-            fields += str(column.name) + ', '
-        fields = fields[:-2]
+        """
+        Build the query as a string.
+        """
+        if self.is_partitioned:
+            sql_query = str('SELECT {} FROM {} ' +
+                            'WHERE _PARTITIONTIME BETWEEN TIMESTAMP(\'{}\') AND TIMESTAMP(\'{}\')')
+        else:
+            sql_query = str('SELECT {} FROM {}')
+
+        fields = ', '.join(str(column.name) for column in self.columns)
 
         if 'filters' in self.query_data.keys():
             sql_query += self._build_filters_clause()
@@ -110,7 +127,10 @@ class Query(object):
         if 'limit' in self.query_data.keys():
             sql_query += self._build_limit_clause()
 
-        return sql_query.format(fields, self.table_name, self.begin_date, self.end_date)
+        if self.is_partitioned:
+            return sql_query.format(fields, self.table_name, self.begin_date, self.end_date)
+        else:
+            return sql_query.format(fields, self.table_name)
 
     def _build_limit_clause(self):
         return ' LIMIT {}'.format(self.query_data['limit']['value'])
@@ -119,17 +139,9 @@ class Query(object):
         query = ''
         not_first_clause = False
         for order in self.query_data['orders']:
-
-            if not not_first_clause:
-                order_or_comma = 'ORDER BY'
-            else:
-                order_or_comma = ','
-
-            if order['desc']:
-                query += ' {} {} DESC'.format(order_or_comma, order['column'])
-            else:
-                query += ' {} {}'.format(order_or_comma, order['column'])
-
+            order_or_comma = 'ORDER BY' if not not_first_clause else ','
+            query += ' {} {} DESC'.format(order_or_comma, order['column']) if order['desc'] \
+                else ' {} {}'.format(order_or_comma, order['column'])
             not_first_clause = True
         return query
 
@@ -164,9 +176,7 @@ class Query(object):
             Example: " field > 100".
             Or even " and test = 'raccoon'".
         """
-        partial_query = ''
-        if not_first_clause:
-            partial_query += ' AND '
+        partial_query = ' AND ' if not_first_clause else ''
         partial_query += self._build_clause_core(filter_clause)
         return partial_query
 
@@ -195,10 +205,8 @@ class Query(object):
             (str) String with the OR clause already built.
             Example: field = 'test' OR other_field = 'other_test'
         """
-        partial_query = ''
+        partial_query = ' and ' if not_first_clause else ''
         clause_sql = '{} OR {}'
-        if not_first_clause:
-            partial_query += ' and '
         clause_sql = clause_sql.format(
             self._build_clause_core(filter_clause['left_side']),
             self._build_clause_core(filter_clause['right_side'])
@@ -235,18 +243,3 @@ class Query(object):
             if column.name == column_name:
                 return True
         return False
-
-    def _get_filter_key(self):
-        if self.table_name == 'adwords_account_report':
-            return 'account_id'
-        elif self.table_name == 'adwords_campaign_report':
-            return 'campaign_id'
-        elif self.table_name == 'adwords_adgroup_report':
-            return 'adgroup_id'
-        elif self.table_name == 'adwords_ad_report':
-            return 'ad_id'
-        elif self.table_name == 'adwords_keyword_report':
-            return 'keyword_id'
-        else:
-            logging.warning("ORM couldnt find the right filter_key... Using account_id")
-            return 'account_id'

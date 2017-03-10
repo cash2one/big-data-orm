@@ -1,6 +1,6 @@
 import unittest
 
-from big_data_orm.resources.mock_data_generator import MockDataGenerator
+from big_data_orm.resources.utils.mock_data_generator import MockDataGenerator
 from big_data_orm.resources.column import Column
 
 

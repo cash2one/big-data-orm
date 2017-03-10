@@ -75,10 +75,7 @@ class Session(object):
         self.connect()
         request = self.service.jobs().get(projectId=self.project_id, jobId=job_id)
         response = request.execute()
-        if response['status']['state'] == 'DONE':
-            return True
-        else:
-            return False
+        return True if response['status']['state'] == 'DONE' else False
 
     def _get_job_id(self, job_json):
         """
@@ -146,13 +143,10 @@ class Session(object):
         data['fields'] = match.group(2)
         data['table'] = match.group(4)
         data['after_where'] = match.group(6)
-        if match.group(5):
-            data['is_where'] = True
-        else:
-            data['is_where'] = False
+        data['is_where'] = True if match.group(5) else False
 
         return data
-
+      
     def _build_request_body(self, query):
         """
         Build the dict that will be sent as payload to bigquery.

@@ -1,5 +1,6 @@
 import unittest
 
+from mock import MagicMock
 from big_data_orm.resources.query import Query
 from big_data_orm.resources.column import Column
 
@@ -26,6 +27,11 @@ class fakeSessionEmptyData():
         return {}
 
 
+class fakeSessionWithMock():
+    def __init__(self):
+        self.run_query = MagicMock(return_value={})
+
+
 class QueryTestCase(unittest.TestCase):
     table_date_range = '' + DATABASE_NAME + '.testing WHERE _PARTITIONTIME BETWEEN ' +\
         'TIMESTAMP(\'2010-01-01\') AND TIMESTAMP(\'2030-01-01\')'
@@ -34,41 +40,11 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
             self.table_date_range
         response = q.assemble()
         self.assertEquals(expected_response, response)
-
-    def test_get_filter_keys(self):
-        c_1 = Column(str, 'column_1')
-        c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], "")
-        table_name = 'adwords_account_report'
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'account_id')
-
-        table_name = 'adwords_campaign_report'
-        q.table_name = table_name
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'campaign_id')
-
-        table_name = 'adwords_adgroup_report'
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'adgroup_id')
-
-        table_name = 'adwords_ad_report'
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'ad_id')
-
-        table_name = 'adwords_keyword_report'
-        q.table_name = table_name
-        key = q._get_filter_key()
-        self.assertEquals(key, 'keyword_id')
 
     def test_query_filter_by_date(self):
         begin_date = '2015-12-01'
@@ -83,7 +59,12 @@ class QueryTestCase(unittest.TestCase):
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
 
-        q = Query([c_1, c_2], table_name).filter_by_date(begin_date, end_date)
+        q = Query(
+            [c_1, c_2],
+            table_name,
+            dataset_id=DATABASE_NAME,
+            is_partitioned=True
+        ).filter_by_date(begin_date, end_date)
 
         expected_response = 'SELECT column_1, column_2 FROM ' + \
             table_date_range
@@ -96,7 +77,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.limit(100)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
             self.table_date_range + ' LIMIT 100'
@@ -107,7 +88,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.limit(100)
         q = q.limit(101)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
@@ -119,7 +100,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.order_by(c_1)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
             self.table_date_range + ' ORDER BY column_1'
@@ -130,7 +111,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.order_by(c_1)
         q = q.order_by(c_2)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
@@ -142,7 +123,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.order_by(c_1, desc=True)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
             self.table_date_range + ' ORDER BY column_1 DESC'
@@ -153,7 +134,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.order_by(c_1, desc=True)
         q = q.order_by(c_2)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
@@ -166,7 +147,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.order_by(c_1, desc=True)
         q = q.order_by(c_2, desc=True)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
@@ -179,7 +160,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.filter(c_1 == 'test')
         expected_response = 'SELECT column_1, column_2 FROM ' + \
             self.table_date_range + ' AND ' + \
@@ -191,7 +172,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         # Wrong comparision
         q = q.filter(c_1 == 10)
         expected_response = 'SELECT column_1, column_2 FROM ' + \
@@ -203,7 +184,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         # Wrong comparision
         q = q.filter(c_1 == 'test')
         q = q.filter(c_2 == 'test2')
@@ -217,7 +198,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.filter(c_1 >= 'test')
         q = q.filter(c_2 == 'test2')
         expected_response = 'SELECT column_1, column_2 FROM ' + \
@@ -230,7 +211,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         q = q.filter(c_1 >= 'test')
         # Wrong comparision
         q = q.filter(c_2 == 100)
@@ -244,7 +225,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         response = q._parse_in_list(['v1', 'v2'])
         self.assertEqual('(\'v1\', \'v2\')', response)
 
@@ -252,7 +233,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         response = q._parse_in_list([10, 20])
         self.assertEqual('(10, 20)', response)
 
@@ -260,7 +241,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         response = q.first(fakeSessionEmptyData)
         self.assertEqual({}, response)
 
@@ -268,7 +249,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         response = q.first(fakeSessionValidData)
         self.assertEqual({'a': 10}, response)
 
@@ -276,7 +257,7 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         response = q.all(fakeSessionValidData)
         self.assertEqual([{'a': 10}, {'b': 20}], response)
 
@@ -284,6 +265,60 @@ class QueryTestCase(unittest.TestCase):
         table_name = 'testing'
         c_1 = Column(str, 'column_1')
         c_2 = Column(str, 'column_2')
-        q = Query([c_1, c_2], table_name)
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
         response = q.all(fakeSessionEmptyData)
         self.assertEqual({}, response)
+
+    def test_query_flatten(self):
+        table_name = 'testing'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query(
+            [c_1, c_2], table_name,
+            dataset_id=DATABASE_NAME, is_partitioned=False
+        )
+        q = q.flatten(c_2)
+        expected_response = str(
+            "SELECT column_1, column_2 FROM "
+            "FLATTEN(" + DATABASE_NAME + "." + table_name + ", column_2)"
+        )
+        response = q.assemble()
+        self.assertEquals(expected_response, response)
+
+    def test_all_session_call_1(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'testing'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        query_str = q.assemble()
+        q.all(fake_session)
+        fake_session.run_query.assert_called_with(query_str)
+
+    def test_all_session_call_2(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'adwords_account_report'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        query_str = q.assemble()
+        q.all(fake_session)
+        fake_session.run_query.assert_called_with(query_str)
+
+    def test_all_session_call_3(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'adwords_account_report'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        self.assertRaises(TypeError, q.all, fake_session, newest_only=True, filter_key='nope')
+
+    def test_first_session_call_1(self):
+        fake_session = fakeSessionWithMock()
+        table_name = 'adwords_account_report'
+        c_1 = Column(str, 'column_1')
+        c_2 = Column(str, 'column_2')
+        q = Query([c_1, c_2], table_name, dataset_id=DATABASE_NAME, is_partitioned=True)
+        query_str = q.assemble()
+        q.first(fake_session)
+        fake_session.run_query.assert_called_with(query_str)

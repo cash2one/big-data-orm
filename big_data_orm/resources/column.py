@@ -1,4 +1,5 @@
 import logging
+from big_data_orm.resources.utils.dict_fields_manipulator import DictFieldsManipulator
 
 
 class Column(object):
@@ -19,28 +20,24 @@ class Column(object):
             if not self.children:
                 logging.error("Columns with type DICT must have children!")
                 raise TypeError("Children argument must be a DICT")
+
             if type(self.children) is not dict:
                 logging.error("Columns with type DICT must have a DICT children!")
                 raise TypeError("Children argument must be a DICT")
-            if not self._check_valid_children(self.children):
+
+            if not DictFieldsManipulator.check_if_children_are_columns(self.children, type(self)):
                 raise TypeError("Children argument is not valid")
 
-    def _check_valid_children(self, children):
+            self._set_children_attr()
+
+    def _set_children_attr(self):
         """
-        If the Columns have children, all of they must be Columns.
+        Set a class attribute for each child column
         """
-        errors = 0
-        for _key in children.keys():
-            child = children.get(_key)
+        for _key in self.children.keys():
+            child = self.children.get(_key)
             if type(child) is Column:
-                child.name = self.name + '.' + child.name
                 setattr(self, _key, child)
-            else:
-                logging.error("Wrong field type at {}.{}".format(self.name, _key))
-                errors = errors + 1
-        if errors > 0:
-            return False
-        return True
 
     def __eq__(self, value):
         return self._build_op_dict('=', value)

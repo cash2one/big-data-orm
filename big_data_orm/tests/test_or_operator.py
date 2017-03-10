@@ -13,7 +13,7 @@ class OROperatorTestCase(unittest.TestCase):
     def basic_test_1(self):
         c_1 = Column(str, 'c1')
         c_2 = Column(int, 'c2')
-        q = Query([c_1, c_2], 'test')
+        q = Query([c_1, c_2], 'test', dataset_id=DATABASE_NAME, is_partitioned=True)
         q.filter(or_(c_1 == 'test_1', c_2 == 10))
         expected_query = 'SELECT c1, c2 FROM ' +\
             '' + DATABASE_NAME + '.test WHERE _PARTITIONTIME BETWEEN ' +\
@@ -25,7 +25,7 @@ class OROperatorTestCase(unittest.TestCase):
     def basic_test_2(self):
         c_1 = Column(str, 'c1')
         c_2 = Column(int, 'c2')
-        q = Query([c_1, c_2], 'test')
+        q = Query([c_1, c_2], 'test', dataset_id=DATABASE_NAME, is_partitioned=True)
         q.filter(or_(c_1 == 10, c_2 == 10))
         expected_query = 'SELECT c1, c2 FROM ' +\
             '' + DATABASE_NAME + '.test WHERE _PARTITIONTIME BETWEEN ' +\
@@ -36,7 +36,7 @@ class OROperatorTestCase(unittest.TestCase):
     def basic_test_3(self):
         c_1 = Column(str, 'c1')
         c_2 = Column(int, 'c2')
-        q = Query([c_1, c_2], 'test')
+        q = Query([c_1, c_2], 'test', dataset_id=DATABASE_NAME, is_partitioned=True)
         q.filter(or_(c_1 == 'test_1', c_2 == 10))
         q = q.filter(c_1 == 'test_2')
         expected_query = 'SELECT c1, c2 FROM ' +\
@@ -50,7 +50,7 @@ class OROperatorTestCase(unittest.TestCase):
     def basic_test_4(self):
         c_1 = Column(str, 'c1')
         c_2 = Column(int, 'c2')
-        q = Query([c_1, c_2], 'test')
+        q = Query([c_1, c_2], 'test', dataset_id=DATABASE_NAME, is_partitioned=True)
         q.filter(or_(c_1 == 10, c_2 == 10))
         q = q.filter(c_1 == 'test_2')
         expected_query = 'SELECT c1, c2 FROM ' +\
