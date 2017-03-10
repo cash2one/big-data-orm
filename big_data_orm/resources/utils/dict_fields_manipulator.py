@@ -10,15 +10,14 @@ class DictFieldsManipulator(object):
         """
         If the Columns have children, all of they must be Columns.
         """
-        errors = 0
+        has_errors = False
         for _key in children.keys():
             child = children.get(_key)
             if type(child) is not column_type:
                 logging.error("Wrong field type at {}".format(_key))
-                errors = errors + 1
-        if errors > 0:
-            return False
-        return True
+                has_errors = True
+
+        return False if has_errors else True
 
     def get_valid_dict_children_leafs(self, columns):
         for column in columns:
