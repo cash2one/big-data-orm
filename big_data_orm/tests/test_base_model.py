@@ -40,21 +40,30 @@ class BaseModelTestCase(unittest.TestCase):
     def test_query_tablename_none(self):
         b = BaseModel()
         c_1 = Column(str, 'testing')
-        response = b.query(c_1)
+        response = b.query([c_1], is_partitioned=False, dataset_id=DATABASE_NAME)
         self.assertEqual(None, response)
 
     def test_query_tablename_not_none(self):
         b = BaseModel()
         b.__tablename__ = 'Test'
         c_1 = Column(str, 'testing')
-        response = b.query(c_1, dataset_id=DATABASE_NAME, is_partitioned=True)
+        response = b.query([c_1], dataset_id=DATABASE_NAME, is_partitioned=True)
         self.assertEqual(Query, type(response))
 
     def test_query_no_args(self):
         b = BaseModel()
         b.__tablename__ = 'Test'
-        response = b.query()
-        self.assertEqual(None, response)
+        self.assertRaises(TypeError, b.query)
+
+    def test_query_no_args_1(self):
+        b = BaseModel()
+        b.__tablename__ = 'Test'
+        self.assertRaises(TypeError, b.query, True)
+
+    def test_query_no_args_2(self):
+        b = BaseModel()
+        b.__tablename__ = 'Test'
+        self.assertRaises(TypeError, b.query, DATABASE_NAME)
 
     def test_get_all_columns_1(self):
         b = BaseModel()

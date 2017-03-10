@@ -116,8 +116,7 @@ class Query(object):
         else:
             sql_query = str('SELECT {} FROM {}')
 
-        fields = ''.join(str(column.name) + ', ' for column in self.columns)
-        fields = fields[:-2]
+        fields = ', '.join(str(column.name) for column in self.columns)
 
         if 'filters' in self.query_data.keys():
             sql_query += self._build_filters_clause()

@@ -14,30 +14,20 @@ class BaseModel(object):
     def __init__(self):
         pass
 
-    def query(self, *args, **kargs):
-        if 'dataset_id' not in kargs.keys():
-            logging.error("Model.query() must receive a dataset_id")
-            return None
-
-        if 'is_partitioned' not in kargs.keys():
-            logging.error("Model.query() must receive a is_partitioned")
-            return None
-
+    def query(self, columns, dataset_id, is_partitioned):
         if not self.__tablename__:
             logging.error("Table name not defined...")
             return None
 
-        columns = []
-
-        if not args:
+        if not columns:
             columns = self._get_all_columns()
         else:
-            columns = [i for i in args]
+            columns = [i for i in columns]
 
         if not columns:
             return None
 
-        return Query(columns, self.__tablename__, kargs['dataset_id'], kargs['is_partitioned'])
+        return Query(columns, self.__tablename__, dataset_id, is_partitioned)
 
     def _get_all_columns(self):
         columns = [attr for attr in dir(self.__class__())
